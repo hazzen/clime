@@ -1,0 +1,19 @@
+<html>
+  <head>
+    <title>Clime!</title>
+
+    <link rel='stylesheet' href='static/clime.css' type='text/css' />
+    <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js'></script>
+    <script type='text/javascript' src='static/base.js'></script>
+    <script type='text/javascript' src='static/render.js'></script>
+    <script type='text/javascript' src='static/game.js'></script>
+    <script type='text/javascript' src='static/clime.js'></script>
+
+  </head>
+  <body>
+    <div id="content">
+      <canvas id="game-canvas" width="640" height="480">
+        You need canvas support to play, sorry.
+      </canvas>
+  </body>
+</html>
