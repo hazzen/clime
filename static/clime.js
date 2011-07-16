@@ -2,9 +2,11 @@ $(document).ready(function() {
   var canvasElem = document.getElementById('game-canvas');
   var renderer = new Renderer(canvasElem);
   var game = new Game(renderer);
+  $(window).keydown(bind(game, game.keyDown));
+  $(window).keyup(bind(game, game.keyUp));
 
   var lastFrame = new Date().getTime();
-  var rope = new Rope(game, 100, 0, 200);
+  var rope = new Rope(game, 300, 0, 200);
   (function renderLoop() {
 
     var now = new Date().getTime();
@@ -15,11 +17,9 @@ $(document).ready(function() {
     }
     for (var i = 0; i < numFrames; i++) {
       game.tick();
-      rope.tick();
     }
     renderer.render();
-    //game.render(renderer);
-    rope.render(renderer);
+    game.render(renderer);
     requestAnimFrame(renderLoop, canvasElem);
   })();
 });
