@@ -7,6 +7,7 @@
     <script type='text/javascript' src='static/base.js'></script>
     <script type='text/javascript' src='static/render.js'></script>
     <script type='text/javascript' src='static/game.js'></script>
+    <script type='text/javascript' src='static/actors.js'></script>
     <script type='text/javascript' src='static/clime.js'></script>
 
   </head>

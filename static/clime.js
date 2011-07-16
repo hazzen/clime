@@ -4,6 +4,7 @@ $(document).ready(function() {
   var game = new Game(renderer);
 
   var lastFrame = new Date().getTime();
+  var rope = new Rope(game, 100, 0, 200);
   (function renderLoop() {
 
     var now = new Date().getTime();
@@ -14,9 +15,11 @@ $(document).ready(function() {
     }
     for (var i = 0; i < numFrames; i++) {
       game.tick();
+      rope.tick();
     }
     renderer.render();
-    game.render();
+    //game.render(renderer);
+    rope.render(renderer);
     requestAnimFrame(renderLoop, canvasElem);
   })();
 });

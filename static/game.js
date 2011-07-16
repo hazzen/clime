@@ -15,15 +15,15 @@ Game.prototype.tick = function() {
   }
 };
 
-Game.prototype.render = function() {
-  var context = this.renderer_.context();
+Game.prototype.render = function(renderer) {
+  var context = renderer.context();
   var w = this.cw_;
-  if (w > this.renderer_.width()) {
-    w = 2 * this.renderer_.width() - w;
+  if (w > renderer.width()) {
+    w = 2 * renderer.width() - w;
   }
   var h = this.ch_;
-  if (h > this.renderer_.height()) {
-    h = 2 * this.renderer_.height() - h;
+  if (h > renderer.height()) {
+    h = 2 * renderer.height() - h;
   }
   context.fillRect(0, 0, w, h);
 };
