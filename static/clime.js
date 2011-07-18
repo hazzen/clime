@@ -16,7 +16,7 @@ $(document).ready(function() {
       window.console.log(now, lastFrame, numFrames);
     }
     for (var i = 0; i < numFrames; i++) {
-      game.tick();
+      game.tick(1 / 42.0);
     }
     renderer.render();
     game.render(renderer);
