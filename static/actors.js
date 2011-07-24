@@ -58,8 +58,19 @@ Rope.prototype.tick = function(t) {
   }
 };
 
+Rope.prototype.pushClockwise = function() { this.force(-4000.0); };
+Rope.prototype.pushCounterClockwise = function() { this.force(4000.0); };
+
 Rope.prototype.force = function(amount) {
-  this.rv_ += amount;
+  this.rv_ += amount / (this.length_ * this.length_);
+};
+
+Rope.prototype.lengthen = function() {
+  this.length_ += 1.5;
+};
+
+Rope.prototype.shorten = function() {
+  this.length_ -= 1.5;
 };
 
 Rope.prototype.render = function(renderer) {

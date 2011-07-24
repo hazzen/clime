@@ -18,10 +18,16 @@ Game.prototype.tick = function(t) {
       }
   }));
   if (this.keyDownCounts_[37]) {  // left
-    this.rope_.force(-1);
+    this.rope_.pushClockwise();
   }
   if (this.keyDownCounts_[39]) {  // right
-    this.rope_.force( 1);
+    this.rope_.pushCounterClockwise();
+  }
+  if (this.keyDownCounts_[38]) {  // up
+    this.rope_.shorten();
+  }
+  if (this.keyDownCounts_[40]) {  // down
+    this.rope_.lengthen();
   }
   if (this.keyDownCounts_[32] == 1) {
     this.rope_.toggleAttached();
