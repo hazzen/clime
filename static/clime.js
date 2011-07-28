@@ -11,8 +11,9 @@ $(document).ready(function() {
   level.addRightBound(new geom.Point(400, 50));
   level.addRightBound(new geom.Point(500, 450));
 
+  game.setLevel(level);
+
   var lastFrame = new Date().getTime();
-  var rope = new Rope(game, 300, 0, 200);
   (function renderLoop() {
 
     var now = new Date().getTime();

@@ -74,25 +74,12 @@ Rope.prototype.shorten = function() {
 };
 
 Rope.prototype.render = function(renderer) {
-  var x1, y1, x2, y2;
-  if (this.attached_) {
-    x1 = this.x_;
-    y1 = this.y_;
-    x2 = this.x_ + this.length_ * Math.sin(this.theta_);
-    y2 = this.y_ + this.length_ * Math.cos(this.theta_);
-  } else {
-    var xd = this.length_ / 2 * Math.sin(this.theta_);
-    var yd = this.length_ / 2 * Math.cos(this.theta_);
-    x1 = this.x_ - xd;
-    y1 = this.y_ - yd;
-    x2 = this.x_ + xd;
-    y2 = this.y_ + yd;
-  }
-  renderer.context().fillRect(x1 - 4.5, y1 - 4.5, 9, 9);
-  renderer.context().fillRect(x2 - 2.5, y2 - 2.5, 5, 5);
+  var line = this.asLine();
+  renderer.context().fillRect(line.p1.x - 4.5, line.p1.y - 4.5, 9, 9);
+  renderer.context().fillRect(line.p2.x - 2.5, line.p2.y - 2.5, 5, 5);
   renderer.context().beginPath();
-  renderer.context().moveTo(x1, y1);
-  renderer.context().lineTo(x2, y2);
+  renderer.context().moveTo(line.p1.x, line.p1.y);
+  renderer.context().lineTo(line.p2.x, line.p2.y);
   renderer.context().stroke();
 };
 
@@ -121,4 +108,22 @@ Rope.prototype.switchEnd = function() {
   this.x_ = nx;
   this.y_ = ny;
   this.theta_ = this.theta_ + Math.PI;
+};
+
+Rope.prototype.asLine = function() {
+  var x1, y1, x2, y2;
+  if (this.attached_) {
+    x1 = this.x_;
+    y1 = this.y_;
+    x2 = this.x_ + this.length_ * Math.sin(this.theta_);
+    y2 = this.y_ + this.length_ * Math.cos(this.theta_);
+  } else {
+    var xd = this.length_ / 2 * Math.sin(this.theta_);
+    var yd = this.length_ / 2 * Math.cos(this.theta_);
+    x1 = this.x_ - xd;
+    y1 = this.y_ - yd;
+    x2 = this.x_ + xd;
+    y2 = this.y_ + yd;
+  }
+  return new geom.Line(new geom.Point(x1, y1), new geom.Point(x2, y2));
 };

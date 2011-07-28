@@ -14,9 +14,10 @@ Level.prototype.tick = function(t) {
 Level.prototype.boundsFor_ = function(arr, minY, maxY) {
   var minIndex = binarySearch(arr, minY, Level.COMPARE_BY_Y);
   var maxIndex = binarySearch(arr, maxY, Level.COMPARE_BY_Y);
-  if (minIndex < 0) minIndex = -minIndex - 1;
+  if (minIndex < 0) minIndex = -minIndex - 2;
   if (maxIndex < 0) maxIndex = -maxIndex - 1;
-  if (maxIndex >= arr.length) --maxIndex;
+  maxIndex = Math.min(arr.length - 1, maxIndex);
+  minIndex = Math.max(0, minIndex);
   return {min:minIndex, max:maxIndex};
 };
 
@@ -54,4 +55,46 @@ Level.prototype.addLeftBound = function(point) {
 
 Level.prototype.addRightBound = function(point) {
   this.rightBounds_.push(point);
+};
+
+Level.prototype.collidesBoundsLine_ = function(arr, line) {
+  var bounds = this.boundsFor_(arr,
+                               Math.min(line.p1.y, line.p2.y),
+                               Math.max(line.p1.y, line.p2.y));
+  for (; bounds.min < bounds.max; ++bounds.min) {
+    var p1 = arr[bounds.min];
+    var p2 = arr[bounds.min + 1];
+    var maybeIntersect = new geom.Line(p1, p2).intersects(line);
+    if (maybeIntersect) {
+      return maybeIntersect;
+    }
+  }
+  return null;
+}
+
+Level.prototype.collidesBoundsCircle_ = function(arr, point, radius) {
+  var bounds = this.boundsFor_(arr,
+                               point.y - radius,
+                               point.y + radius);
+  for (; bounds.min < bounds.max; ++bounds.min) {
+    var p1 = arr[bounds.min];
+    var p2 = arr[bounds.min + 1];
+    var maybeIntersect = new geom.Line(p1, p2).circleIntersects(point, radius);
+    if (maybeIntersect) {
+      return maybeIntersect;
+    }
+  }
+  return null;
+}
+
+Level.prototype.collidesLine = function(line) {
+  return (this.collidesBoundsLine_(this.leftBounds_, line) ||
+          this.collidesBoundsLine_(this.rightBounds_, line));
+};
+
+Level.prototype.collidesCircle = function(point, opt_radius) {
+  var radius = opt_radius || 1;
+
+  return (this.collidesBoundsCircle_(this.leftBounds_, point, radius) ||
+          this.collidesBoundsCircle_(this.rightBounds_, point, radius));
 };

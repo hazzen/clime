@@ -59,10 +59,10 @@ var geom = geom || {};
 geom.operators = geom.operators || {};
 
 geom.operators.POINT_PLUS = function(p1, p2) {
-  return new Point(p1.x + p2.x, p1.y + p2.y);
+  return new geom.Point(p1.x + p2.x, p1.y + p2.y);
 };
 geom.operators.POINT_MULT = function(p1, p2) {
-  return new Point(p1.x * p2.x, p1.y * p2.y);
+  return new geom.Point(p1.x * p2.x, p1.y * p2.y);
 };
 geom.operators.POINT_LE = function(p1, p2) {
   return p1.x <= p2.x && p1.y <= p2.y;
@@ -77,6 +77,10 @@ geom.operators.POINT_GE = function(p1, p2) {
 geom.Point = function(x, y) {
   this.x = x;
   this.y = y;
+};
+
+geom.Point.prototype.plus = function(o) {
+  return geom.operators.POINT_PLUS(this, o);
 };
 
 // +----------------------------------------------------------------------------
@@ -109,13 +113,27 @@ geom.Line.prototype.intersects = function(other) {
   if (denom == 0) {
     return false;
   }
-  var t = ((other.p2.x - other.p1.x) * (this.p1.y - other.p1.y) -
-           (other.p2.y - other.p1.y) * (this.p1.x - other.p1.x)) / denom;
-  if (t < 0 || t > 1) {
+  var t1 = ((other.p2.x - other.p1.x) * (this.p1.y - other.p1.y) -
+            (other.p2.y - other.p1.y) * (this.p1.x - other.p1.x)) / denom;
+  var t2 = ((this.p2.x - this.p1.x) * (this.p1.y - other.p1.y) -
+            (this.p2.y - this.p1.y) * (this.p1.x - other.p1.x)) / denom;
+  if (t1 < 0 || t2 < 0 || t1 > 1 || t2 > 1) {
     return false;
   }
-  return new Point(this.p1.x + t * (this.p2.x - this.p1.x),
-                   this.p1.y + t * (this.p2.y - this.p1.y));
+  return new geom.Point(this.p1.x + t1 * (this.p2.x - this.p1.x),
+                        this.p1.y + t1 * (this.p2.y - this.p1.y));
+};
+
+geom.Line.prototype.circleIntersects = function(center, radius) {
+  var lineNormalX = this.p2.y - this.p1.y;
+  var lineNormalY = this.p2.x - this.p1.x;
+  var normalMag = Math.pow(
+      Math.pow(lineNormalX, 2) + Math.pow(lineNormalY, 2), 0.5);
+  lineNormalX = radius * lineNormalX / normalMag;
+  lineNormalY = radius * lineNormalY / normalMag;
+  return this.intersects(new geom.Line(
+      center.plus(new geom.Point( lineNormalX,  lineNormalY)),
+      center.plus(new geom.Point(-lineNormalX, -lineNormalY))));
 };
 
 geom.Line.prototype.sideOf = function(point) {
