@@ -34,8 +34,14 @@ Rope.prototype.tickPendulum_ = function(t) {
       1,
       Rope.RK_PENDULUM.PLUS,
       Rope.RK_PENDULUM.MULT);
-  this.rv_ = newVals[1] / t;
-  this.theta_ = newVals[0] % (2 * Math.PI);
+  if ((this.stabilized_ && (newVals[1] > 0) != (this.stableRv_ > 0)) ||
+      !this.stabilized_) {
+    this.stabilized_ = false;
+    this.rv_ = newVals[1] / t;
+    this.theta_ = newVals[0] % (2 * Math.PI);
+  } else {
+    this.rv_ = 0;
+  }
 
   if (this.rv_ > Rope.MAX_V) {
     this.rv_ = Rope.MAX_V;
@@ -50,6 +56,15 @@ Rope.prototype.tickFreeFall_ = function(t) {
   this.yv_ += t * 300;
   this.theta_ += t * this.rv_;
   this.theta_ = this.theta_ % (2 * Math.PI);
+};
+
+Rope.prototype.stabilize = function() {
+  if (!this.stabilized_) {
+    this.stabilized_ = true;
+    if (this.rv_ != 0) {
+      this.stableRv_ = this.rv_;
+    }
+  }
 };
 
 Rope.prototype.tick = function(t) {
@@ -103,7 +118,8 @@ Rope.prototype.render = function(renderer) {
   renderer.context().stroke();
 };
 
-Rope.prototype.toggleAttached = function() {
+Rope.prototype.setAttached = function(attached) {
+  if (this.attached_ == attached) return attached;
   this.attached_ = !this.attached_;
   if (this.attached_) {
     var nx = this.x_ - this.length_ / 2 * Math.cos(this.theta_);
@@ -117,28 +133,47 @@ Rope.prototype.toggleAttached = function() {
     var ny = this.y_ + this.length_ / 2 * Math.sin(this.theta_);
     this.x_ = nx;
     this.y_ = ny;
-    this.xv_ = this.rv_ * Math.cos(this.theta_) * this.length_;
-    this.yv_ = -this.rv_ * Math.sin(this.theta_) * this.length_;
+    this.xv_ = -this.rv_ * Math.sin(this.theta_) * this.length_;
+    this.yv_ = this.rv_ * Math.cos(this.theta_) * this.length_;
   }
+  return !attached;
+};
+
+Rope.prototype.toggleAttached = function() {
+  this.setAttached(!this.attached_);
 };
 
 Rope.prototype.switchEnd = function() {
-  // TODO: FIXME.
-  if (this.bends_.length) {
-    return;
-  }
-  /*
-  this.bends_.reverse();
-  for (var i = this.bends_.length; i > 0; --i) {
-    var bend = this.bends_[i];
+  var reverseBend = function(bend) {
+    bend.x = bend.x + bend.length * Math.cos(bend.theta);
+    bend.y = bend.y + bend.length * Math.sin(bend.theta);
     bend.theta = (bend.theta + Math.PI) % (2 * Math.PI);
+  };
+  var bendsLen = this.bends_.length;
+  if (bendsLen) {
+    var asLine = this.asLine();
+    this.bends_.push({
+      theta: (this.theta_ + Math.PI) % (2 * Math.PI),
+      length: this.length_,
+      x: asLine.p2.x,
+      y: asLine.p2.y,
+      clockwise: this.rv_ > 0});
+    this.bends_.reverse();
+    for (var i = 1; i < bendsLen - 1; ++i) {
+      reverseBend(this.bends_[i]);
+    }
+    var lastBend = this.bends_.pop();
+    reverseBend(lastBend);
+    this.x_ = lastBend.x;
+    this.y_ = lastBend.y;
+    this.theta_ = lastBend.theta;
+  } else {
+    var nx = this.x_ + this.length_ * Math.cos(this.theta_);
+    var ny = this.y_ + this.length_ * Math.sin(this.theta_);
+    this.x_ = nx;
+    this.y_ = ny;
+    this.theta_ = (this.theta_ + Math.PI) % (2 * Math.PI);
   }
-  */
-  var nx = this.x_ + this.length_ * Math.cos(this.theta_);
-  var ny = this.y_ + this.length_ * Math.sin(this.theta_);
-  this.x_ = nx;
-  this.y_ = ny;
-  this.theta_ = this.theta_ + Math.PI;
 };
 
 Rope.prototype.asLine = function() {

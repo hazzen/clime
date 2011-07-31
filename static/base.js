@@ -176,10 +176,10 @@ geom.Line.prototype.normal = function() {
 };
 
 geom.Line.prototype.circleIntersects = function(center, radius) {
-  var normalized = this.normalized();
+  var norm = this.normal();
   return this.intersects(new geom.Line(
-      center.plus(normalized.times(radius)),
-      center.plus(normalized.times(-radius))));
+      center.plus(norm.times(radius)),
+      center.plus(norm.times(-radius))));
 };
 
 geom.Line.prototype.sideOf = function(point) {

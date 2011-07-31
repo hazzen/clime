@@ -46,22 +46,34 @@ Game.prototype.tickHandleInput_ = function(t) {
 Game.prototype.tick = function(t) {
   this.tickHandleInput_(t);
 
+  if (this.level_.collidesCircle(this.rope_.asLine().p2, 5)) {
+    this.rope_.stabilize();
+  }
   this.rope_.tick(t);
 
   var ropeLine = this.rope_.asLine();
   var collisionLines = [];
   var collide = this.level_.collidesLine(ropeLine, collisionLines);
   if (collide) {
+    var wasAttached = this.rope_.setAttached(true);
     var len = collisionLines.length;
     if (len == 1) {
-      this.rope_.switchEnd();
-      // Push out the rope away from the wall it hit.
-      var pointOn = collisionLines[0].projectPoint(ropeLine.p2, 5);
-      this.rope_.x_ = pointOn.x;
-      this.rope_.y_ = pointOn.y;
-      this.rope_.rv_ = 0;
-      this.rope_.xv_ = 0;
-      this.rope_.yv_ = 0;
+      var line = collisionLines[0];
+      if (wasAttached) {
+        this.rope_.stabilize();
+        this.rope_.rv_ = 0;
+        this.rope_.xv_ = 0;
+        this.rope_.yv_ = 0;
+      } else {
+        this.rope_.switchEnd();
+        // Push out the rope away from the wall it hit.
+        var pointOn = line.projectPoint(ropeLine.p2, 5);
+        this.rope_.x_ = pointOn.x;
+        this.rope_.y_ = pointOn.y;
+        this.rope_.rv_ = 0;
+        this.rope_.xv_ = 0;
+        this.rope_.yv_ = 0;
+      }
     } else if (len == 2) {
       var l1n = collisionLines[0].normal();
       var l2n = collisionLines[1].normal();
