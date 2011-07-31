@@ -61,6 +61,9 @@ geom.operators = geom.operators || {};
 geom.operators.POINT_PLUS = function(p1, p2) {
   return new geom.Point(p1.x + p2.x, p1.y + p2.y);
 };
+geom.operators.POINT_MINUS = function(p1, p2) {
+  return new geom.Point(p1.x - p2.x, p1.y - p2.y);
+};
 geom.operators.POINT_MULT = function(p1, p2) {
   return new geom.Point(p1.x * p2.x, p1.y * p2.y);
 };
@@ -81,6 +84,18 @@ geom.Point = function(x, y) {
 
 geom.Point.prototype.plus = function(o) {
   return geom.operators.POINT_PLUS(this, o);
+};
+
+geom.Point.prototype.minus = function(o) {
+  return geom.operators.POINT_MINUS(this, o);
+};
+
+geom.Point.prototype.times = function(o) {
+  return new geom.Point(this.x * o, this.y * o);
+};
+
+geom.Point.prototype.dot = function(o) {
+  return this.x * o.x + this.y * o.y;
 };
 
 // +----------------------------------------------------------------------------
@@ -107,6 +122,20 @@ geom.Line = function(p1, p2) {
   this.p2 = p2;
 };
 
+geom.Line.prototype.projectPoint = function(point, opt_distance) {
+  var norm = this.normalized();
+  var p1ToMe = point.minus(this.p1);
+  var pointOn = this.p1.plus(norm.times(norm.dot(p1ToMe)));
+  if (opt_distance) {
+    var orth = this.normal();
+    if (p1ToMe.dot(orth) > 0) {
+      opt_distance *= -1;
+    }
+    return pointOn.plus(orth.times(opt_distance));
+  }
+  return pointOn;
+};
+
 geom.Line.prototype.intersects = function(other) {
   var denom = ((other.p2.y - other.p1.y) * (this.p2.x - this.p1.x) -
                (other.p2.x - other.p1.x) * (this.p2.y - this.p1.y));
@@ -124,16 +153,33 @@ geom.Line.prototype.intersects = function(other) {
                         this.p1.y + t1 * (this.p2.y - this.p1.y));
 };
 
+geom.Line.prototype.mag2 = function() {
+  var dx = this.p2.y - this.p1.y;
+  var dy = this.p2.x - this.p1.x;
+  return Math.pow(dx, 2) + Math.pow(dy, 2);
+};
+
+geom.Line.prototype.mag = function() {
+  return Math.pow(this.mag2(), 0.5);
+};
+
+geom.Line.prototype.normalized = function() {
+  var mag = this.mag();
+  return new geom.Point((this.p2.x - this.p1.x) / mag,
+                        (this.p2.y - this.p1.y) / mag);
+};
+
+geom.Line.prototype.normal = function() {
+  var mag = this.mag();
+  return new geom.Point((this.p1.y - this.p2.y) / mag,
+                        (this.p2.x - this.p1.x) / mag);
+};
+
 geom.Line.prototype.circleIntersects = function(center, radius) {
-  var lineNormalX = this.p2.y - this.p1.y;
-  var lineNormalY = this.p2.x - this.p1.x;
-  var normalMag = Math.pow(
-      Math.pow(lineNormalX, 2) + Math.pow(lineNormalY, 2), 0.5);
-  lineNormalX = radius * lineNormalX / normalMag;
-  lineNormalY = radius * lineNormalY / normalMag;
+  var normalized = this.normalized();
   return this.intersects(new geom.Line(
-      center.plus(new geom.Point( lineNormalX,  lineNormalY)),
-      center.plus(new geom.Point(-lineNormalX, -lineNormalY))));
+      center.plus(normalized.times(radius)),
+      center.plus(normalized.times(-radius))));
 };
 
 geom.Line.prototype.sideOf = function(point) {

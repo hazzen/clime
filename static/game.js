@@ -39,12 +39,7 @@ Game.prototype.tickHandleInput_ = function(t) {
   if (this.keyDownCounts_['X'.charCodeAt(0)] == 1) {
     var nx = this.rope_.x_ + 0.5 * this.rope_.length_ * Math.cos(this.rope_.theta_);
     var ny = this.rope_.y_ + 0.5 * this.rope_.length_ * Math.sin(this.rope_.theta_);
-    this.rope_.bend(new geom.Point(nx, ny), true);
-  }
-  if (this.keyDownCounts_['S'.charCodeAt(0)] == 1) {
-    var nx = this.rope_.x_ + 0.5 * this.rope_.length_ * Math.cos(this.rope_.theta_);
-    var ny = this.rope_.y_ + 0.5 * this.rope_.length_ * Math.sin(this.rope_.theta_);
-    this.rope_.bend(new geom.Point(nx, ny), false);
+    this.rope_.bend(new geom.Point(nx, ny));
   }
 };
 
@@ -54,22 +49,33 @@ Game.prototype.tick = function(t) {
   this.rope_.tick(t);
 
   var ropeLine = this.rope_.asLine();
-  var p1Collide = this.level_.collidesCircle(ropeLine.p1, 5);
-  var p2Collide = this.level_.collidesCircle(ropeLine.p2, 3);
-  if (p1Collide || p2Collide) {
-    this.rope_.rv_ = 0;
-    this.rope_.xv_ = 0;
-    this.rope_.yv_ = 0;
-    window.console.log(p1Collide, p2Collide);
-  } else {
-    var collisionPoints = [];
-    var collide = this.level_.collidesLine(ropeLine, collisionPoints);
-    if (collide) {
+  var collisionLines = [];
+  var collide = this.level_.collidesLine(ropeLine, collisionLines);
+  if (collide) {
+    var len = collisionLines.length;
+    if (len == 1) {
+      this.rope_.switchEnd();
+      // Push out the rope away from the wall it hit.
+      var pointOn = collisionLines[0].projectPoint(ropeLine.p2, 5);
+      this.rope_.x_ = pointOn.x;
+      this.rope_.y_ = pointOn.y;
       this.rope_.rv_ = 0;
       this.rope_.xv_ = 0;
       this.rope_.yv_ = 0;
-      window.console.log(collide, collisionPoints.length);
+    } else if (len == 2) {
+      var l1n = collisionLines[0].normal();
+      var l2n = collisionLines[1].normal();
+      this.rope_.bend(collisionLines[0].p2.plus(l1n.plus(l2n).times(5)));
+    } else {
+      var d1 = new geom.Line(ropeLine.p1, collisionLines[0].p2).mag2();
+      var d2 = new geom.Line(ropeLine.p1, collisionLines[len - 1].p1).mag2();
+      if (d1 < d2) {
+        this.rope_.bend(collisionLines[0].p2);
+      } else {
+        this.rope_.bend(collisionLines[len - 1].p1);
+      }
     }
+    window.console.log(collide, len);
   }
 };
 

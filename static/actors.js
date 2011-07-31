@@ -123,6 +123,17 @@ Rope.prototype.toggleAttached = function() {
 };
 
 Rope.prototype.switchEnd = function() {
+  // TODO: FIXME.
+  if (this.bends_.length) {
+    return;
+  }
+  /*
+  this.bends_.reverse();
+  for (var i = this.bends_.length; i > 0; --i) {
+    var bend = this.bends_[i];
+    bend.theta = (bend.theta + Math.PI) % (2 * Math.PI);
+  }
+  */
   var nx = this.x_ + this.length_ * Math.cos(this.theta_);
   var ny = this.y_ + this.length_ * Math.sin(this.theta_);
   this.x_ = nx;
@@ -148,7 +159,7 @@ Rope.prototype.asLine = function() {
   return new geom.Line(new geom.Point(x1, y1), new geom.Point(x2, y2));
 };
 
-Rope.prototype.bend = function(point, clockwise) {
+Rope.prototype.bend = function(point) {
   var len = Math.pow(
       Math.pow(point.x - this.x_, 2) + Math.pow(point.y - this.y_, 2),
       0.5);
@@ -158,7 +169,7 @@ Rope.prototype.bend = function(point, clockwise) {
       length: this.length_,
       x: this.x_,
       y: this.y_,
-      clockwise: clockwise});
+      clockwise: this.rv_ > 0});
   this.x_ = point.x;
   this.y_ = point.y;
   this.length_ -= len;

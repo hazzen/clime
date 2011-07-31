@@ -10,7 +10,8 @@ $(document).ready(function() {
   level.addLeftBound(new geom.Point(15, 50));
   level.addRightBound(new geom.Point(500, 0));
   level.addRightBound(new geom.Point(400, 50));
-  level.addRightBound(new geom.Point(500, 450));
+  level.addRightBound(new geom.Point(300, 350));
+  level.addRightBound(new geom.Point(600, 450));
 
   game.setLevel(level);
 
