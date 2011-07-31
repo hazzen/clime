@@ -35,10 +35,8 @@ Level.prototype.renderSide_ = function(renderer, arr, leftIsFilled) {
   }
   if (leftIsFilled) {
     ctx.lineTo(renderer.xOffset(), arr[bounds.max].y);
-    ctx.lineTo(renderer.xOffset(), minY);
   } else {
     ctx.lineTo(renderer.xOffset() + renderer.width(), arr[bounds.max].y);
-    ctx.lineTo(renderer.xOffset() + renderer.width(), minY);
   }
   ctx.closePath();
   ctx.fill();
@@ -57,19 +55,23 @@ Level.prototype.addRightBound = function(point) {
   this.rightBounds_.push(point);
 };
 
-Level.prototype.collidesBoundsLine_ = function(arr, line) {
+Level.prototype.collidesBoundsLine_ = function(arr, line, opt_intersected) {
   var bounds = this.boundsFor_(arr,
                                Math.min(line.p1.y, line.p2.y),
                                Math.max(line.p1.y, line.p2.y));
+  var collided = false;
+  var intersected = opt_intersected || [];
   for (; bounds.min < bounds.max; ++bounds.min) {
     var p1 = arr[bounds.min];
     var p2 = arr[bounds.min + 1];
-    var maybeIntersect = new geom.Line(p1, p2).intersects(line);
+    var wallLine = new geom.Line(p1, p2);
+    var maybeIntersect = wallLine.intersects(line);
     if (maybeIntersect) {
-      return maybeIntersect;
+      collided = true;
+      intersected.push(wallLine);
     }
   }
-  return null;
+  return collided;
 }
 
 Level.prototype.collidesBoundsCircle_ = function(arr, point, radius) {
@@ -87,9 +89,10 @@ Level.prototype.collidesBoundsCircle_ = function(arr, point, radius) {
   return null;
 }
 
-Level.prototype.collidesLine = function(line) {
-  return (this.collidesBoundsLine_(this.leftBounds_, line) ||
-          this.collidesBoundsLine_(this.rightBounds_, line));
+Level.prototype.collidesLine = function(line, opt_intersected) {
+  var l = this.collidesBoundsLine_(this.leftBounds_, line, opt_intersected);
+  var r = this.collidesBoundsLine_(this.rightBounds_, line, opt_intersected);
+  return l || r;
 };
 
 Level.prototype.collidesCircle = function(point, opt_radius) {

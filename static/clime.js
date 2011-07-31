@@ -8,6 +8,7 @@ $(document).ready(function() {
 
   level.addLeftBound(new geom.Point(5, 0));
   level.addLeftBound(new geom.Point(15, 50));
+  level.addRightBound(new geom.Point(500, 0));
   level.addRightBound(new geom.Point(400, 50));
   level.addRightBound(new geom.Point(500, 450));
 

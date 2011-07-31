@@ -36,12 +36,21 @@ Game.prototype.tickHandleInput_ = function(t) {
   if (this.keyDownCounts_['A'.charCodeAt(0)] == 1) {
     this.rope_.switchEnd();
   }
+  if (this.keyDownCounts_['X'.charCodeAt(0)] == 1) {
+    var nx = this.rope_.x_ + 0.5 * this.rope_.length_ * Math.cos(this.rope_.theta_);
+    var ny = this.rope_.y_ + 0.5 * this.rope_.length_ * Math.sin(this.rope_.theta_);
+    this.rope_.bend(new geom.Point(nx, ny), true);
+  }
+  if (this.keyDownCounts_['S'.charCodeAt(0)] == 1) {
+    var nx = this.rope_.x_ + 0.5 * this.rope_.length_ * Math.cos(this.rope_.theta_);
+    var ny = this.rope_.y_ + 0.5 * this.rope_.length_ * Math.sin(this.rope_.theta_);
+    this.rope_.bend(new geom.Point(nx, ny), false);
+  }
 };
 
 Game.prototype.tick = function(t) {
   this.tickHandleInput_(t);
 
-  var ropeLinePre = this.rope_.asLine();
   this.rope_.tick(t);
 
   var ropeLine = this.rope_.asLine();
@@ -53,10 +62,13 @@ Game.prototype.tick = function(t) {
     this.rope_.yv_ = 0;
     window.console.log(p1Collide, p2Collide);
   } else {
-    var preCollide = this.level_.collidesLine(ropeLinePre);
-    var postCollide = this.level_.collidesLine(ropeLine);
-    if (preCollide || postCollide) {
-      window.console.log(preCollide, postCollide);
+    var collisionPoints = [];
+    var collide = this.level_.collidesLine(ropeLine, collisionPoints);
+    if (collide) {
+      this.rope_.rv_ = 0;
+      this.rope_.xv_ = 0;
+      this.rope_.yv_ = 0;
+      window.console.log(collide, collisionPoints.length);
     }
   }
 };
