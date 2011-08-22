@@ -22,6 +22,9 @@ function loadTga(path, done) {
   $.ajax({
     url: path,
     success: function(data) { parseTga(data, done); },
+    beforeSend: function(xhr) {
+      xhr.overrideMimeType('text/plain; charset=x-user-defined');
+    },
     dataType: 'text'
   });
 }
@@ -77,9 +80,9 @@ TgaImage.prototype.pixelAt = function(x, y) {
   y = Math.min(this.height - 1, Math.max(0, y));
   var index = x + (this.height - y - 1) * this.width;
   var reader = new ByteReader(this.pixels.substring(4 * index, 4 * index + 4));
-  var r = reader.readByte();
-  var g = reader.readByte();
   var b = reader.readByte();
+  var g = reader.readByte();
+  var r = reader.readByte();
   var a = reader.readByte();
   return { r: r, g: g, b: b, a: a };
 };
