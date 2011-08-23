@@ -1,3 +1,18 @@
+function max(arr, opt_cmp) {
+  var l = arr.length;
+  var b = arr[0];
+  for (var i = 1; i < l; ++i) {
+    if (opt_cmp) {
+      if (opt_cmp(b, arr[i]) < 0) {
+        b = arr[i];
+      }
+    } else  if (arr[i] > b) {
+      b = arr[i];
+    }
+  }
+  return b;
+}
+
 function bind(obj, method) {
   var args = Array.prototype.slice.call(arguments, 2);
   return function() {
@@ -101,8 +116,8 @@ geom.Point.prototype.dot = function(o) {
 // +----------------------------------------------------------------------------
 // | AABB class
 geom.AABB = function(x, y, w, h) {
-  this.p1 = new Point(x, y);
-  this.p2 = new Point(x + w, y + h);
+  this.p1 = new geom.Point(x, y);
+  this.p2 = new geom.Point(x + w, y + h);
 };
 
 geom.AABB.prototype.contains = function(point) {
@@ -185,4 +200,25 @@ geom.Line.prototype.circleIntersects = function(center, radius) {
 geom.Line.prototype.sideOf = function(point) {
   return ((this.p2.x - this.p1.x) * (point.y - this.p1.y) -
           (this.p2.y - this.p1.y) * (point.x - this.p2.x));
+};
+
+function Rgb(r, g, b, a) {
+  this.r = r;
+  this.g = g;
+  this.b = b;
+  this.a = a;
+};
+
+Rgb.prototype.toCssString = function() {
+  var as16 = function(n) {
+    var s = n.toString(16);
+    while (s.length < 2) {
+      s = '0' + s;
+    }
+    if (s.length > 2) {
+      s = s.substr(0, 2);
+    }
+    return s;
+  };
+  return '#' + as16(this.r) + as16(this.g) + as16(this.b);
 };

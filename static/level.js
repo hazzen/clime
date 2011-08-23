@@ -1,109 +1,98 @@
-function Level(game) {
-  this.leftBounds_ = [];
-  this.rightBounds_ = [];
+function Level(game, imgPath) {
+  this.game_ = game;
+  this.imgPath_ = imgPath;
+  this.coordToBlock_ = {};
 };
 
-Level.COMPARE_BY_Y = function(val, point) {
-  // Ignore NaN, inf, and other bad cases.
-  return val - point.y;
+Level.prototype.load = function(done) {
+  loadTga(this.imgPath_, bind(this, this.loadDone_, done));
 };
 
-Level.prototype.tick = function(t) {
-};
+Level.prototype.loadDone_ = function(done, img) {
+  this.img_ = img;
 
-Level.prototype.boundsFor_ = function(arr, minY, maxY) {
-  var minIndex = binarySearch(arr, minY, Level.COMPARE_BY_Y);
-  var maxIndex = binarySearch(arr, maxY, Level.COMPARE_BY_Y);
-  if (minIndex < 0) minIndex = -minIndex - 2;
-  if (maxIndex < 0) maxIndex = -maxIndex - 1;
-  maxIndex = Math.min(arr.length - 1, maxIndex);
-  minIndex = Math.max(0, minIndex);
-  return {min:minIndex, max:maxIndex};
-};
-
-Level.prototype.renderSide_ = function(renderer, arr, leftIsFilled) {
-  var minY = renderer.yOffset();
-  var maxY = renderer.yOffset() + renderer.height();
-  var bounds = this.boundsFor_(arr, minY, maxY);
-  var ctx = renderer.context();
-
-  ctx.beginPath();
-  ctx.moveTo(arr[bounds.min].x, arr[bounds.min].y);
-  bounds.min++;
-  for (; bounds.min <= bounds.max; ++bounds.min) {
-    ctx.lineTo(arr[bounds.min].x, arr[bounds.min].y);
+  for (var x = 0; x < this.img_.width; ++x) {
+    for (var y = 0; y < this.img_.height; ++y) {
+      var c = this.img_.pixelAt(x, y);
+      var s = c.r + c.g + c.b;
+      if (s < 3 * 255) {
+        var block = new SolidBlock(x, y, c.toCssString());
+        this.coordToBlock_['x' + x + 'y' + y] = block;
+      }
+    }
   }
-  if (leftIsFilled) {
-    ctx.lineTo(renderer.xOffset(), arr[bounds.max].y);
-  } else {
-    ctx.lineTo(renderer.xOffset() + renderer.width(), arr[bounds.max].y);
-  }
-  ctx.closePath();
-  ctx.fill();
+
+  done();
 };
 
 Level.prototype.render = function(renderer) {
-  this.renderSide_(renderer, this.leftBounds_, true);
-  this.renderSide_(renderer, this.rightBounds_, false);
+  $.each(this.coordToBlock_, bind(this, function(key, value) {
+    value.render(renderer);
+  }));
 };
 
-Level.prototype.addLeftBound = function(point) {
-  this.leftBounds_.push(point);
+Level.prototype.blockAtPixel = function(x, y) {
+  var sx = Math.floor(x / Game.SQUARE_SIZE);
+  var sy = Math.floor(y / Game.SQUARE_SIZE);
+  return this.coordToBlock_['x' + sx + 'y' + sy];
 };
 
-Level.prototype.addRightBound = function(point) {
-  this.rightBounds_.push(point);
-};
-
-Level.prototype.genericCollidesBounds_ = function(
-    arr, y1, y2, collideFn, opt_intersected) {
-  var bounds = this.boundsFor_(arr, Math.min(y1, y2), Math.max(y1, y2));
-  var collided = false;
-  var intersected = opt_intersected || [];
-  for (; bounds.min < bounds.max; ++bounds.min) {
-    var p1 = arr[bounds.min];
-    var p2 = arr[bounds.min + 1];
-    var wallLine = new geom.Line(p1, p2);
-    var maybeIntersect = collideFn(wallLine);
-    if (maybeIntersect) {
-      collided = true;
-      intersected.push(wallLine);
+Level.prototype.pushBlocksInRect = function(rect, arr) {
+  var dy = Math.ceil((rect.p2.y - rect.p1.y) / Game.SQUARE_SIZE);
+  for (var y = rect.p1.y; dy > 0; --dy, y += Game.SQUARE_SIZE) {
+    var dx = Math.ceil((rect.p2.x - rect.p1.x) / Game.SQUARE_SIZE);
+    for (var x = rect.p1.x; dx > 0; --dx, x += Game.SQUARE_SIZE) {
+      var block = this.blockAtPixel(x, y);
+      if (block) {
+        block.pushBlocksInRect(rect, arr);
+      }
     }
   }
-  return collided;
 };
 
-Level.prototype.collidesBoundsLine_ = function(arr, line, opt_intersected) {
-  return this.genericCollidesBounds_(
-      arr,
-      line.p1.y,
-      line.p2.y,
-      function (wallLine) { return wallLine.intersects(line); },
-      opt_intersected);
-}
+Level.QUADRANTS = {};
+Level.QUADRANTS.UL = 0;
+Level.QUADRANTS.UC = 1;
+Level.QUADRANTS.UR = 2;
+Level.QUADRANTS.ML = 3;
+Level.QUADRANTS.MC = 4;
+Level.QUADRANTS.MR = 5;
+Level.QUADRANTS.LL = 6;
+Level.QUADRANTS.LC = 7;
+Level.QUADRANTS.LR = 8;
 
-Level.prototype.collidesBoundsCircle_ = function(
-    arr, point, radius, opt_intersected) {
-  return this.genericCollidesBounds_(
-      arr,
-      point.y - radius,
-      point.y + radius,
-      function (wallLine) { return wallLine.circleIntersects(point, radius); },
-      opt_intersected);
-}
-
-Level.prototype.collidesLine = function(line, opt_intersected) {
-  var l = this.collidesBoundsLine_(this.leftBounds_, line, opt_intersected);
-  var r = this.collidesBoundsLine_(this.rightBounds_, line, opt_intersected);
-  return l || r;
-};
-
-Level.prototype.collidesCircle = function(point, opt_radius, opt_intersected) {
-  var radius = opt_radius || 1;
-
-  var l = this.collidesBoundsCircle_(
-      this.leftBounds_, point, radius, opt_intersected);
-  var r = this.collidesBoundsCircle_(
-      this.rightBounds_, point, radius, opt_intersected);
-  return l || r;
+Level.prototype.blocksInQuadrants = function(rect, ox, oy) {
+  ox = ox || 1;
+  oy = oy || 1;
+  var quads = [[],[],[],[],[],[],[],[],[]];
+  var w = rect.p2.x - rect.p1.x;
+  var h = rect.p2.y - rect.p1.y;
+  this.pushBlocksInRect(
+      new geom.AABB(rect.p1.x - ox, rect.p1.y - oy, ox, oy),
+      quads[Level.QUADRANTS.UL]);
+  this.pushBlocksInRect(
+      new geom.AABB(rect.p1.x, rect.p1.y - oy, w, oy),
+      quads[Level.QUADRANTS.UC]);
+  this.pushBlocksInRect(
+      new geom.AABB(rect.p2.x, rect.p1.y - oy, ox, oy),
+      quads[Level.QUADRANTS.UR]);
+  this.pushBlocksInRect(
+      new geom.AABB(rect.p1.x - ox, rect.p1.y, ox, h),
+      quads[Level.QUADRANTS.ML]);
+  this.pushBlocksInRect(
+      new geom.AABB(rect.p1.x, rect.p1.y, w, h),
+      quads[Level.QUADRANTS.MC]);
+  this.pushBlocksInRect(
+      new geom.AABB(rect.p2.x, rect.p1.y, ox, h),
+      quads[Level.QUADRANTS.MR]);
+  this.pushBlocksInRect(
+      new geom.AABB(rect.p1.x - ox, rect.p2.y, ox, oy),
+      quads[Level.QUADRANTS.LL]);
+  this.pushBlocksInRect(
+      new geom.AABB(rect.p1.x, rect.p2.y, w, oy),
+      quads[Level.QUADRANTS.LC]);
+  this.pushBlocksInRect(
+      new geom.AABB(rect.p2.x, rect.p2.y, ox, oy),
+      quads[Level.QUADRANTS.LR]);
+  return quads;
 };

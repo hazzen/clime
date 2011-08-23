@@ -1,3 +1,75 @@
+function Dude(game, x, y) {
+  this.game_ = game;
+  this.x_ = x;
+  this.y_ = y;
+  this.vx_ = 0;
+  this.vy_ = 0;
+  this.grounded_ = false;
+};
+
+Dude.MAX_VX = 10;
+Dude.ACCEL_X = 1;
+Dude.DEACCEL_X = 0.5;
+
+Dude.MAX_VY = 10;
+Dude.ACCEL_Y = 1;
+
+Dude.SIZE = 2 * Game.SQUARE_SIZE;
+
+Dude.prototype.checkGround_ = function() {
+  var blocks = this.game_.level.blocksInQuadrants(new geom.AABB(
+      this.x_, this.y_,
+      Dude.SIZE, Dude.SIZE),
+      Math.max(1, Math.abs(this.vx_)), Math.max(1, Math.abs(this.vy_)));
+  var below = blocks[Level.QUADRANTS.LC];
+  var left = blocks[Level.QUADRANTS.ML];
+  var right = blocks[Level.QUADRANTS.MR];
+  if (below.length) {
+    var highest = max(below, function(b1, b2) { return b2.y - b1.y; });
+    this.y_ = highest.y * Game.SQUARE_SIZE - Dude.SIZE;
+    this.vy_ = 0;
+  } else {
+    this.vy_ += Dude.ACCEL_Y;
+  }
+  if (left.length && this.vx_ < 0) {
+    var highest = max(left, function(b1, b2) { return b2.x - b1.x; });
+    this.x_ = highest.x * Game.SQUARE_SIZE + highest.w;
+    this.vx_ = 0;
+  }
+  if (right.length && this.vx_ > 0) {
+    var lowest = max(right, function(b1, b2) { return b1.x - b2.x; });
+    this.x_ = lowest.x * Game.SQUARE_SIZE - Dude.SIZE;
+    this.vx_ = 0;
+  }
+};
+
+Dude.prototype.tick = function(t) {
+  if (this.game_.keyDown(37)) {
+    this.vx_ -= Dude.ACCEL_X;
+  }
+  if (this.game_.keyDown(39)) {
+    this.vx_ += Dude.ACCEL_X;
+  }
+  this.vx_ = Math.min(Dude.MAX_VX, Math.max(-Dude.MAX_VX, this.vx_));
+  if (this.vx_ > Dude.DEACCEL_X) {
+    this.vx_ -= Dude.DEACCEL_X;
+  } else if (this.vx_ < -Dude.DEACCEL_X) {
+    this.vx_ += Dude.DEACCEL_X;
+  } else if (this.vx_ != 0) {
+    this.vx_ = 0;
+  }
+
+  this.checkGround_();
+  this.x_ += this.vx_;
+  this.y_ += this.vy_;
+};
+
+Dude.prototype.render = function(renderer) {
+  renderer.context().fillStyle = '#cdf';
+  renderer.context().fillRect(
+      this.x_, this.y_, Dude.SIZE, Dude.SIZE);
+};
+
 function Rope(game, x, y, len) {
   this.game_ = game;
   this.x_ = x;

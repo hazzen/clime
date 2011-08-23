@@ -84,7 +84,7 @@ TgaImage.prototype.pixelAt = function(x, y) {
   var g = reader.readByte();
   var r = reader.readByte();
   var a = reader.readByte();
-  return { r: r, g: g, b: b, a: a };
+  return new Rgb(r, g, b, a);
 };
 
 function parseTga(data, done) {

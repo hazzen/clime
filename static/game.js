@@ -1,8 +1,23 @@
 function Game(renderer) {
-  this.rope_ = new Rope(this, 300, 0, 50);
+  //this.rope_ = new Rope(this, 300, 0, 50);
+  this.dude_ = new Dude(this, 8, 25);
   this.keyDown_ = {};
   this.keyDownCounts_ = {};
   this.level_ = null;
+};
+
+Game.SQUARE_SIZE = 8;
+
+Game.prototype.keyPressed = function(chr) {
+  return this.keyDown(chr) == 1;
+};
+
+Game.prototype.keyDown = function(chr) {
+  if (typeof(chr) == 'string') {
+    return this.keyDownCounts_[chr.toUpperCase().charCodeAt(0)];
+  } else {
+    return this.keyDownCounts_[chr];
+  }
 };
 
 Game.prototype.tickHandleInput_ = function(t) {
@@ -18,6 +33,7 @@ Game.prototype.tickHandleInput_ = function(t) {
         this.keyDownCounts_[key] = 0;
       }
   }));
+  /*
   if (this.keyDownCounts_[37]) {  // left
     this.rope_.pushClockwise();
   }
@@ -41,11 +57,14 @@ Game.prototype.tickHandleInput_ = function(t) {
     var ny = this.rope_.y_ + 0.5 * this.rope_.length_ * Math.sin(this.rope_.theta_);
     this.rope_.bend(new geom.Point(nx, ny));
   }
+  */
 };
 
 Game.prototype.tick = function(t) {
   this.tickHandleInput_(t);
 
+  this.dude_.tick(t);
+  /*
   if (this.level_.collidesCircle(this.rope_.asLine().p2, 5)) {
     this.rope_.stabilize();
   }
@@ -89,20 +108,21 @@ Game.prototype.tick = function(t) {
     }
     window.console.log(collide, len);
   }
+  */
 };
 
 Game.prototype.render = function(renderer) {
-  this.rope_.render(renderer);
+  this.dude_.render(renderer);
 };
 
-Game.prototype.keyDown = function(event) {
+Game.prototype.onKeyDown = function(event) {
   this.keyDown_[event.keyCode] = true;
 };
 
-Game.prototype.keyUp = function(event) {
+Game.prototype.onKeyUp = function(event) {
   this.keyDown_[event.keyCode] = false;
 };
 
 Game.prototype.setLevel = function(level) {
-  this.level_ = level;
+  this.level = level;
 };
