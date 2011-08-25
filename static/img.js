@@ -12,7 +12,7 @@ ByteReader.prototype.readByte = function(opt_num) {
   var mult = 1;
   for (; num > 0; --num) {
     read += mult * (this.data.charCodeAt(this.index++) & 0xff);
-    mult *= 255;
+    mult *= 256;
   }
   return read;
 };
