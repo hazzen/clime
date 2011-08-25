@@ -8,6 +8,10 @@ function Game(renderer) {
 
 Game.SQUARE_SIZE = 8;
 
+Game.prototype.playerPos = function() {
+  return new geom.Point(this.dude_.x_, this.dude_.y_);
+};
+
 Game.prototype.keyPressed = function(chr) {
   return this.keyDown(chr) == 1;
 };
@@ -113,6 +117,9 @@ Game.prototype.tick = function(t) {
 
 Game.prototype.render = function(renderer) {
   this.dude_.render(renderer);
+  if (this.level) {
+    this.level.render(renderer);
+  }
 };
 
 Game.prototype.onKeyDown = function(event) {

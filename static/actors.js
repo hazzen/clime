@@ -4,7 +4,7 @@ function Dude(game, x, y) {
   this.y_ = y;
   this.vx_ = 0;
   this.vy_ = 0;
-  this.grounded_ = false;
+  this.jumpFrame_ = 0;
 };
 
 Dude.MAX_VX = 10;
@@ -24,10 +24,11 @@ Dude.prototype.checkGround_ = function() {
   var below = blocks[Level.QUADRANTS.LC];
   var left = blocks[Level.QUADRANTS.ML];
   var right = blocks[Level.QUADRANTS.MR];
-  if (below.length) {
-    var highest = max(below, function(b1, b2) { return b2.y - b1.y; });
-    this.y_ = highest.y * Game.SQUARE_SIZE - Dude.SIZE;
+  if (below.length && this.vy_ >= 0) {
+    var lowest = max(below, function(b1, b2) { return b1.y - b2.y; });
+    this.y_ = lowest.y * Game.SQUARE_SIZE - Dude.SIZE;
     this.vy_ = 0;
+    this.jumpFrame_ = 0;
   } else {
     this.vy_ += Dude.ACCEL_Y;
   }
@@ -58,8 +59,17 @@ Dude.prototype.tick = function(t) {
   } else if (this.vx_ != 0) {
     this.vx_ = 0;
   }
+  if (this.game_.keyDown('z') && this.jumpFrame_ < 10) {
+    ++this.jumpFrame_;
+    if (this.jumpFrame_ == 1) {
+      this.vy_ -= 5 * Dude.ACCEL_Y;
+    } else {
+      this.vy_ -= 1.3 * Dude.ACCEL_Y;
+    }
+  }
 
   this.checkGround_();
+
   this.x_ += this.vx_;
   this.y_ += this.vy_;
 };

@@ -1,3 +1,7 @@
+function sgn(n) {
+  return n < 0 ? -1 : 1;
+};
+
 function max(arr, opt_cmp) {
   var l = arr.length;
   var b = arr[0];

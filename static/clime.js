@@ -20,9 +20,7 @@ $(document).ready(function() {
       for (var i = 0; i < numFrames; i++) {
         game.tick(1 / 42.0);
       }
-      renderer.render();
-      game.render(renderer);
-      level.render(renderer);
+      renderer.render(game);
       requestAnimFrame(renderLoop, canvasElem);
     })();
   });
