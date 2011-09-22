@@ -38,6 +38,9 @@ Level.prototype.blockAtPixel = function(x, y) {
 };
 
 Level.prototype.pushBlocksInRect = function(rect, arr) {
+  if (rect.p1.x == rect.p2.x || rect.p1.y == rect.p2.y) {
+    return;
+  }
   var dy = Math.ceil((rect.p2.y - rect.p1.y) / Game.SQUARE_SIZE);
   for (var y = rect.p1.y; dy > 0; --dy, y += Game.SQUARE_SIZE) {
     var dx = Math.ceil((rect.p2.x - rect.p1.x) / Game.SQUARE_SIZE);
@@ -61,38 +64,55 @@ Level.QUADRANTS.LL = 6;
 Level.QUADRANTS.LC = 7;
 Level.QUADRANTS.LR = 8;
 
-Level.prototype.blocksInQuadrants = function(rect, ox, oy) {
-  ox = ox || 1;
-  oy = oy || 1;
+Level.QUADRANTS.VERTICAL = [
+  Level.QUADRANTS.UL,
+  Level.QUADRANTS.UC,
+  Level.QUADRANTS.UR,
+  Level.QUADRANTS.LL,
+  Level.QUADRANTS.LC,
+  Level.QUADRANTS.LR
+];
+Level.QUADRANTS.HORIZONTAL = [
+  Level.QUADRANTS.UL,
+  Level.QUADRANTS.UR,
+  Level.QUADRANTS.ML,
+  Level.QUADRANTS.MR,
+  Level.QUADRANTS.LL,
+  Level.QUADRANTS.LR
+];
+
+Level.prototype.blocksInQuadrants = function(rect, outerRect) {
   var quads = [[],[],[],[],[],[],[],[],[]];
   var w = rect.p2.x - rect.p1.x;
   var h = rect.p2.y - rect.p1.y;
+  var p1d = rect.p1.minus(outerRect.p1);
+  var p2d = outerRect.p2.minus(rect.p2);
   this.pushBlocksInRect(
-      new geom.AABB(rect.p1.x - ox, rect.p1.y - oy, ox, oy),
+      new geom.AABB(rect.p1.x - p1d.x, rect.p1.y - p1d.y, p1d.x, p1d.y),
       quads[Level.QUADRANTS.UL]);
   this.pushBlocksInRect(
-      new geom.AABB(rect.p1.x, rect.p1.y - oy, w, oy),
+      new geom.AABB(rect.p1.x, rect.p1.y - p1d.y, w, p1d.y),
       quads[Level.QUADRANTS.UC]);
   this.pushBlocksInRect(
-      new geom.AABB(rect.p2.x, rect.p1.y - oy, ox, oy),
+      new geom.AABB(rect.p2.x, rect.p1.y - p1d.y, p2d.x, p1d.y),
       quads[Level.QUADRANTS.UR]);
   this.pushBlocksInRect(
-      new geom.AABB(rect.p1.x - ox, rect.p1.y, ox, h),
+      new geom.AABB(rect.p1.x - p1d.x, rect.p1.y, p1d.x, h),
       quads[Level.QUADRANTS.ML]);
   this.pushBlocksInRect(
       new geom.AABB(rect.p1.x, rect.p1.y, w, h),
       quads[Level.QUADRANTS.MC]);
   this.pushBlocksInRect(
-      new geom.AABB(rect.p2.x, rect.p1.y, ox, h),
+      new geom.AABB(rect.p2.x, rect.p1.y, p2d.x, h),
       quads[Level.QUADRANTS.MR]);
   this.pushBlocksInRect(
-      new geom.AABB(rect.p1.x - ox, rect.p2.y, ox, oy),
+      new geom.AABB(rect.p1.x - p1d.x, rect.p2.y, p1d.x, p2d.y),
       quads[Level.QUADRANTS.LL]);
   this.pushBlocksInRect(
-      new geom.AABB(rect.p1.x, rect.p2.y, w, oy),
+      new geom.AABB(rect.p1.x, rect.p2.y, w, p2d.y),
       quads[Level.QUADRANTS.LC]);
   this.pushBlocksInRect(
-      new geom.AABB(rect.p2.x, rect.p2.y, ox, oy),
+      new geom.AABB(rect.p2.x, rect.p2.y, p2d.x, p2d.y),
       quads[Level.QUADRANTS.LR]);
   return quads;
 };

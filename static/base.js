@@ -1,5 +1,5 @@
 function sgn(n) {
-  return n < 0 ? -1 : 1;
+  return n < 0 ? -1 : (n > 0 ? 1 : 0);
 };
 
 function max(arr, opt_cmp) {
@@ -10,7 +10,22 @@ function max(arr, opt_cmp) {
       if (opt_cmp(b, arr[i]) < 0) {
         b = arr[i];
       }
-    } else  if (arr[i] > b) {
+    } else if (arr[i] > b) {
+      b = arr[i];
+    }
+  }
+  return b;
+}
+
+function min(arr, opt_cmp) {
+  var l = arr.length;
+  var b = arr[0];
+  for (var i = 1; i < l; ++i) {
+    if (opt_cmp) {
+      if (opt_cmp(b, arr[i]) > 0) {
+        b = arr[i];
+      }
+    } else if (arr[i] < b) {
       b = arr[i];
     }
   }
