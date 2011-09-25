@@ -22,6 +22,18 @@ Level.prototype.load = function(done) {
   loadTga(this.imgPath_, bind(this, this.loadDone_, done));
 };
 
+Level.prototype.coordsForBlock_ = function(b) {
+  var sx = Math.floor(b.x / Game.SQUARE_SIZE);
+  var sy = Math.floor(b.y / Game.SQUARE_SIZE);
+  return 'x' + sx + 'y' + sy;
+};
+
+Level.prototype.coordsForPixel_ = function(x, y) {
+  var sx = Math.floor(x / Game.SQUARE_SIZE);
+  var sy = Math.floor(y / Game.SQUARE_SIZE);
+  return 'x' + sx + 'y' + sy;
+};
+
 Level.prototype.loadDone_ = function(done, img) {
   this.img_ = img;
 
@@ -44,11 +56,11 @@ Level.prototype.loadDone_ = function(done, img) {
 };
 
 Level.prototype.eraseBlock = function(b) {
-  delete this.coordToBlock_['x' + b.x + 'y' + b.y];
+  delete this.coordToBlock_[this.coordsForBlock_(b)];
 };
 
 Level.prototype.setBlock = function(b) {
-  this.coordToBlock_['x' + b.x + 'y' + b.y] = b;
+  this.coordToBlock_[this.coordToBlock_(b)] = b;
 };
 
 Level.prototype.render = function(renderer) {
@@ -58,9 +70,7 @@ Level.prototype.render = function(renderer) {
 };
 
 Level.prototype.blockAtPixel = function(x, y) {
-  var sx = Math.floor(x / Game.SQUARE_SIZE);
-  var sy = Math.floor(y / Game.SQUARE_SIZE);
-  return this.coordToBlock_['x' + sx + 'y' + sy];
+  return this.coordToBlock_[this.coordsForPixel_(x, y)];
 };
 
 Level.prototype.pushBlocksInRect = function(rect, arr) {

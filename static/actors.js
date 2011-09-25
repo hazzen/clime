@@ -121,7 +121,12 @@ Dude.prototype.checkGround_ = function() {
       this.y_ = best.y;
       if (this.vy_ >= 0) {
         this.y_ -= Dude.SIZE;
-        this.jumpFrame_ = 0;
+        for (var i = blocks[Level.QUADRANTS.LC].length; i > 0; --i) {
+          if (blocks[Level.QUADRANTS.LC][i - 1].solid) {
+            this.jumpFrame_ = 0;
+            break;
+          }
+        }
       } else {
         this.y_ += best.h;
       }
