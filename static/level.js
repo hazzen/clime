@@ -4,10 +4,18 @@ function Level(game, imgPath) {
   this.coordToBlock_ = {};
 };
 
+Level.createTriggerBlock_ = function(c) {
+  if (c.r == 255 && c.g + c.b == 0) {
+    return CheckpointTrigger;
+  }
+  return null;
+};
+
 Level.simpleBlocks_ = {
-  255: SolidBlock,
-  254: TrapBlock,
-  253: DrainingBlock
+  255: function() { return SolidBlock; },
+  254: function() { return TrapBlock; },
+  253: function() { return DrainingBlock; },
+  250: Level.createTriggerBlock_
 };
 
 Level.prototype.load = function(done) {
@@ -22,9 +30,9 @@ Level.prototype.loadDone_ = function(done, img) {
       var c = this.img_.pixelAt(x, y);
       var s = c.r + c.g + c.b;
       if (s < 3 * 255) {
-        var ctor = Level.simpleBlocks_[c.a];
-        if (ctor) {
-          var block = new ctor(x, y, c);
+        var ctorFunc = Level.simpleBlocks_[c.a];
+        if (ctorFunc) {
+          var block = new (ctorFunc(c))(x, y, c);
           this.coordToBlock_['x' + x + 'y' + y] = block;
         }
       }

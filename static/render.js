@@ -31,6 +31,10 @@ Renderer.prototype.context = function() {
 
 Renderer.prototype.render = function(game) {
   this.context_.clearRect(0, 0, this.w_, this.h_);
+  // Render the UI
+  game.dude.energy.render(this);
+
+  // Track viewport
   this.context_.save();
 
   var accel = function(cur, target, vel) {
@@ -52,6 +56,7 @@ Renderer.prototype.render = function(game) {
   this.xOff_ += this.xOffVel_;
   this.yOff_ += this.yOffVel_;
 
+  // Render game
   this.context_.translate(-this.xOff_, -this.yOff_);
   game.render(this);
   this.context_.restore();

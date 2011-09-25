@@ -1,6 +1,6 @@
 function Game(renderer) {
   //this.rope_ = new Rope(this, 300, 0, 50);
-  this.dude_ = new Dude(this, 8, 25);
+  this.dude = new Dude(this, 8, 25);
   this.keyDown_ = {};
   this.keyDownCounts_ = {};
   this.level_ = null;
@@ -9,7 +9,7 @@ function Game(renderer) {
 Game.SQUARE_SIZE = 8;
 
 Game.prototype.playerPos = function() {
-  return new geom.Point(this.dude_.x_, this.dude_.y_);
+  return new geom.Point(this.dude.x_, this.dude.y_);
 };
 
 Game.prototype.keyPressed = function(chr) {
@@ -64,10 +64,23 @@ Game.prototype.tickHandleInput_ = function(t) {
   */
 };
 
+Game.prototype.setCheckpoint = function(trigger) {
+  this.lastCheckpoint_ = trigger;
+};
+
+Game.prototype.respawn = function() {
+  this.dude.x_ = this.lastCheckpoint_.x * Game.SQUARE_SIZE;
+  this.dude.y_ = this.lastCheckpoint_.y * Game.SQUARE_SIZE;
+  this.dude.energy.refill();
+};
+
 Game.prototype.tick = function(t) {
   this.tickHandleInput_(t);
 
-  this.dude_.tick(t);
+  this.dude.tick(t);
+  if (this.dude.energy.energy <= 0) {
+    this.respawn();
+  }
   /*
   if (this.level_.collidesCircle(this.rope_.asLine().p2, 5)) {
     this.rope_.stabilize();
@@ -116,7 +129,7 @@ Game.prototype.tick = function(t) {
 };
 
 Game.prototype.render = function(renderer) {
-  this.dude_.render(renderer);
+  this.dude.render(renderer);
   if (this.level) {
     this.level.render(renderer);
   }

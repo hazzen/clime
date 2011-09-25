@@ -1,3 +1,38 @@
+function DudeEnergy(energy, opt_maxEnergy) {
+  this.energy = energy;
+  this.maxEnergy = opt_maxEnergy || energy;
+  this.sapTypes_ = {};
+};
+
+DudeEnergy.SapTypes = {
+  STATIONARY: 1,
+  DRAINER: 4,
+  CHECKPOINT: -4
+};
+
+DudeEnergy.prototype.addSap = function(type) {
+  this.sapTypes_[type] = true;
+};
+
+DudeEnergy.prototype.refill = function() {
+  this.energy = this.maxEnergy;
+};
+
+DudeEnergy.prototype.tick = function(t) {
+  this.energy -= t;
+  for (var key in this.sapTypes_) {
+    this.energy -= key * t;
+  }
+  this.energy = Math.min(this.maxEnergy, Math.max(0, this.energy));
+  this.sapTypes_ = {};
+};
+
+DudeEnergy.prototype.render = function(renderer) {
+  var width = renderer.width() * (this.energy / this.maxEnergy);
+  renderer.context().fillStyle = '#A5FF7F';
+  renderer.context().fillRect((renderer.width() - width) / 2, 0, width, 10);
+};
+
 function Dude(game, x, y) {
   this.game_ = game;
   this.x_ = x;
@@ -7,6 +42,7 @@ function Dude(game, x, y) {
   this.pvy_ = 0;
   this.vy_ = 0;
   this.jumpFrame_ = 0;
+  this.energy = new DudeEnergy(10);
 };
 
 Dude.MAX_VX = 10;
@@ -64,6 +100,8 @@ Dude.prototype.checkGround_ = function() {
     }
     return best;
   }
+  // Throway call just to get the playerTouched calls.
+  bestOfMany([Level.QUADRANTS.MC], function() { return false; });
   var vCollide = false;
   var hCollide = false;
   if (this.vy_ != 0) {
@@ -153,6 +191,7 @@ Dude.prototype.tick = function(t) {
 
   this.x_ += this.vx_;
   this.y_ += this.vy_;
+  this.energy.tick(t);
 };
 
 Dude.prototype.render = function(renderer) {

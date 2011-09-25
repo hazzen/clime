@@ -1,4 +1,8 @@
 // +----------------------------------------------------------------------------
+// | Blocks
+// +----------------------------------------------------------------------------
+
+// +----------------------------------------------------------------------------
 // | SolidBlock (also the base class of all blocks)
 function SolidBlock(x, y, color, opt_w, opt_h) {
   if (arguments.length == 0) return;
@@ -55,4 +59,36 @@ function DrainingBlock(x, y, color, opt_w, opt_h) {
 DrainingBlock.inherits(SolidBlock);
 
 DrainingBlock.prototype.playerTouched = function(game) {
+  game.dude.energy.addSap(DudeEnergy.SapTypes.DRAINER);
 };
+
+// +----------------------------------------------------------------------------
+// | Triggers
+// +----------------------------------------------------------------------------
+
+// +----------------------------------------------------------------------------
+// | TriggerBlock (base class for triggers)
+function TriggerBlock(x, y, color, opt_w, opt_h) {
+  if (arguments.length == 0) return;
+  SolidBlock.call(this, x, y, color, opt_w, opt_h);
+  this.solid = false;
+}
+
+TriggerBlock.inherits(SolidBlock);
+
+TriggerBlock.prototype.render = function(renderer) {}
+
+// +----------------------------------------------------------------------------
+// | CheckpointTrigger
+function CheckpointTrigger(x, y, color, opt_w, opt_h) {
+  if (arguments.length == 0) return;
+  TriggerBlock.call(this, x, y, color, opt_w, opt_h);
+  this.solid = false;
+}
+
+CheckpointTrigger.inherits(TriggerBlock);
+
+CheckpointTrigger.prototype.playerTouched = function(game) {
+  game.setCheckpoint(this);
+  game.dude.energy.addSap(DudeEnergy.SapTypes.CHECKPOINT);
+}
