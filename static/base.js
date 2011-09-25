@@ -1,3 +1,12 @@
+// MonkeyPatch in "inheritance".
+Function.prototype.inherits = function(clazz) {
+  var ctor = this.prototype.constructor;
+  this.prototype = new clazz();
+  this.prototype.constructor = ctor;
+  // Maybe add super?
+  return this;
+};
+
 function sgn(n) {
   return n < 0 ? -1 : (n > 0 ? 1 : 0);
 };
@@ -240,4 +249,8 @@ Rgb.prototype.toCssString = function() {
     return s;
   };
   return '#' + as16(this.r) + as16(this.g) + as16(this.b);
+};
+
+Rgb.prototype.toRgbString = function() {
+  return 'rgba(' + this.r + ',' + this.g + ',' + this.b + ',' + (this.a / 255) + ')';
 };

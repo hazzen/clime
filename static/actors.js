@@ -47,25 +47,18 @@ Dude.prototype.checkGround_ = function() {
     } catch (e) {
     }
   }
-  var yCheck = (this.vy_ >= 0
-                ? blocks[Level.QUADRANTS.LC]
-                : blocks[Level.QUADRANTS.UC]);
-  var xCheck = (this.vx_ >= 0
-                ? blocks[Level.QUADRANTS.MR]
-                : blocks[Level.QUADRANTS.ML]);
-  var diagCheck = [];
-  if (this.vy_ != 0 && this.vx_ != 0) {
-    var diagCheckQuadrant = 3 * (-sgn(this.vy_) + 1) + sgn(this.vx_) + 1;
-    diagCheck = blocks[diagCheckQuadrant];
-  }
+
+  var game = this.game_;
   function bestOfMany(quadList, op) {
     var best = null;
     for (var i = quadList.length; i > 0; --i) {
       var toCheck = blocks[quadList[i - 1]];
       if (toCheck && toCheck.length) {
-        var bestInToCheck = max(toCheck, op);
-        if (!best || op(best, bestInToCheck) < 0) {
-          best = bestInToCheck;
+        for (var j = toCheck.length; j > 0; --j) {
+          toCheck[j - 1].playerTouched(game);
+          if (toCheck[j - 1].solid && (!best || op(best, toCheck[j - 1]) < 0)) {
+            best = toCheck[j - 1];
+          }
         }
       }
     }

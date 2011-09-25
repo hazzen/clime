@@ -4,6 +4,12 @@ function Level(game, imgPath) {
   this.coordToBlock_ = {};
 };
 
+Level.simpleBlocks_ = {
+  255: SolidBlock,
+  254: TrapBlock,
+  253: DrainingBlock
+};
+
 Level.prototype.load = function(done) {
   loadTga(this.imgPath_, bind(this, this.loadDone_, done));
 };
@@ -16,13 +22,24 @@ Level.prototype.loadDone_ = function(done, img) {
       var c = this.img_.pixelAt(x, y);
       var s = c.r + c.g + c.b;
       if (s < 3 * 255) {
-        var block = new SolidBlock(x, y, c.toCssString());
-        this.coordToBlock_['x' + x + 'y' + y] = block;
+        var ctor = Level.simpleBlocks_[c.a];
+        if (ctor) {
+          var block = new ctor(x, y, c);
+          this.coordToBlock_['x' + x + 'y' + y] = block;
+        }
       }
     }
   }
 
   done();
+};
+
+Level.prototype.eraseBlock = function(b) {
+  delete this.coordToBlock_['x' + b.x + 'y' + b.y];
+};
+
+Level.prototype.setBlock = function(b) {
+  this.coordToBlock_['x' + b.x + 'y' + b.y] = b;
 };
 
 Level.prototype.render = function(renderer) {
