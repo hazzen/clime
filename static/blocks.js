@@ -38,6 +38,7 @@ SolidBlock.prototype.playerTouched = function(game) {
 function TrapBlock(x, y, color, opt_w, opt_h) {
   if (arguments.length == 0) return;
   SolidBlock.call(this, x, y, color, opt_w, opt_h);
+  this.solid = false;
 };
 
 TrapBlock.inherits(SolidBlock);

@@ -6,7 +6,7 @@ function DudeEnergy(energy, opt_maxEnergy) {
 
 DudeEnergy.SapTypes = {
   STATIONARY: 1,
-  DRAINER: 4,
+  DRAINER: 2,
   CHECKPOINT: -4
 };
 

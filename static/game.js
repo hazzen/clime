@@ -70,7 +70,7 @@ Game.prototype.setCheckpoint = function(trigger) {
 
 Game.prototype.respawn = function() {
   this.dude.x_ = this.lastCheckpoint_.x * Game.SQUARE_SIZE;
-  this.dude.y_ = this.lastCheckpoint_.y * Game.SQUARE_SIZE;
+  this.dude.y_ = this.lastCheckpoint_.y * Game.SQUARE_SIZE - Game.SQUARE_SIZE;
   this.dude.energy.refill();
 };
 
