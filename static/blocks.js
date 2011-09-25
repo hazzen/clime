@@ -17,10 +17,7 @@ function SolidBlock(x, y, color, opt_w, opt_h) {
 SolidBlock.prototype.render = function(renderer) {
   renderer.context().fillStyle = this.color;
   renderer.context().fillRect(
-      this.x * Game.SQUARE_SIZE,
-      this.y * Game.SQUARE_SIZE,
-      Game.SQUARE_SIZE,
-      Game.SQUARE_SIZE);
+      this.x, this.y, Game.SQUARE_SIZE, Game.SQUARE_SIZE);
 };
 
 SolidBlock.prototype.pushBlocksInRect = function(rect, arr) {

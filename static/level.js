@@ -32,7 +32,8 @@ Level.prototype.loadDone_ = function(done, img) {
       if (s < 3 * 255) {
         var ctorFunc = Level.simpleBlocks_[c.a];
         if (ctorFunc) {
-          var block = new (ctorFunc(c))(x, y, c);
+          var block = new (ctorFunc(c))(
+              x * Game.SQUARE_SIZE, y * Game.SQUARE_SIZE, c);
           this.coordToBlock_['x' + x + 'y' + y] = block;
         }
       }

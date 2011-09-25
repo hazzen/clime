@@ -118,7 +118,7 @@ Dude.prototype.checkGround_ = function() {
       best = bestOfMany([Level.QUADRANTS.UC, Level.QUADRANTS.LC], op);
     }
     if (best) {
-      this.y_ = best.y * Game.SQUARE_SIZE;
+      this.y_ = best.y;
       if (this.vy_ >= 0) {
         this.y_ -= Dude.SIZE;
         this.jumpFrame_ = 0;
@@ -140,7 +140,7 @@ Dude.prototype.checkGround_ = function() {
       best = bestOfMany([Level.QUADRANTS.ML, Level.QUADRANTS.MR], op);
     }
     if (best) {
-      this.x_ = best.x * Game.SQUARE_SIZE;
+      this.x_ = best.x;
       if (this.vx_ >= 0) {
         this.x_ -= Dude.SIZE;
       } else {
@@ -184,7 +184,7 @@ Dude.prototype.tick = function(t) {
   }
   this.vy_ += Dude.ACCEL_Y;
   if (this.jumpFrame_ >= 10 && this.vy_ < 0) {
-    this.vy_ = 0;
+    this.vy_ += Dude.ACCEL_Y;
   }
 
   this.checkGround_();
