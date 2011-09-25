@@ -29,6 +29,13 @@ Renderer.prototype.context = function() {
   return this.context_;
 };
 
+Renderer.prototype.centerCamera = function(x, y) {
+  this.xOff_ = x - this.w_ / 2;
+  this.yOff_ = y - this.h_ / 2;
+  this.xOffVel_ = 0;
+  this.yOffVel_ = 0;
+};
+
 Renderer.prototype.render = function(game) {
   this.context_.clearRect(0, 0, this.w_, this.h_);
   // Render the UI
@@ -57,7 +64,8 @@ Renderer.prototype.render = function(game) {
   this.yOff_ += this.yOffVel_;
 
   // Render game
-  this.context_.translate(-this.xOff_, -this.yOff_);
+  this.context_.translate(-Math.round(this.xOff_) + 0.5,
+                          -Math.round(this.yOff_) + 0.5);
   game.render(this);
   this.context_.restore();
 };

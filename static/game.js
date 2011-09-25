@@ -1,5 +1,6 @@
 function Game(renderer) {
   //this.rope_ = new Rope(this, 300, 0, 50);
+  this.renderer = renderer;
   this.dude = new Dude(this, 8, 25);
   this.keyDown_ = {};
   this.keyDownCounts_ = {};
@@ -72,6 +73,7 @@ Game.prototype.respawn = function() {
   this.dude.x_ = this.lastCheckpoint_.x;
   this.dude.y_ = this.lastCheckpoint_.y - Game.SQUARE_SIZE;
   this.dude.energy.refill();
+  this.renderer.centerCamera(this.dude.x_, this.dude.y_);
 };
 
 Game.prototype.tick = function(t) {

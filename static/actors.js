@@ -45,7 +45,7 @@ function Dude(game, x, y) {
   this.energy = new DudeEnergy(10);
 };
 
-Dude.MAX_VX = 10;
+Dude.MAX_VX = 7;
 Dude.ACCEL_X = 1;
 Dude.DEACCEL_X = 0.5;
 
