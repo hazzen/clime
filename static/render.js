@@ -38,8 +38,8 @@ Renderer.prototype.centerCamera = function(x, y) {
 
 Renderer.prototype.render = function(game) {
   this.context_.clearRect(0, 0, this.w_, this.h_);
-  // Render the UI
-  game.dude.energy.render(this);
+  // Render the background UI
+  game.renderUiBackground(this);
 
   // Track viewport
   this.context_.save();
@@ -68,4 +68,7 @@ Renderer.prototype.render = function(game) {
                           -Math.round(this.yOff_) + 0.5);
   game.render(this);
   this.context_.restore();
+
+  // Render the foreground UI
+  game.renderUiForeground(this);
 };

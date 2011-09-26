@@ -1,3 +1,5 @@
+// +----------------------------------------------------------------------------
+// | Game
 function Game(renderer) {
   //this.rope_ = new Rope(this, 300, 0, 50);
   this.renderer = renderer;
@@ -5,6 +7,7 @@ function Game(renderer) {
   this.keyDown_ = {};
   this.keyDownCounts_ = {};
   this.level_ = null;
+  this.scribe_ = new Scribe(this);
 };
 
 Game.SQUARE_SIZE = 8;
@@ -81,7 +84,9 @@ Game.prototype.tick = function(t) {
 
   this.dude.tick(t);
   if (this.dude.energy.energy <= 0) {
+    this.scribe_.addEvent(Scribe.BasicEvents.DIED);
     this.respawn();
+    this.scribe_.startNewChain();
   }
   /*
   if (this.level_.collidesCircle(this.rope_.asLine().p2, 5)) {
@@ -130,6 +135,14 @@ Game.prototype.tick = function(t) {
   */
 };
 
+Game.prototype.renderUiBackground = function(renderer) {
+  this.dude.energy.render(renderer);
+};
+
+Game.prototype.renderUiForeground = function(renderer) {
+  this.scribe_.render(renderer);
+};
+
 Game.prototype.render = function(renderer) {
   this.dude.render(renderer);
   if (this.level) {
@@ -147,4 +160,38 @@ Game.prototype.onKeyUp = function(event) {
 
 Game.prototype.setLevel = function(level) {
   this.level = level;
+};
+
+// +----------------------------------------------------------------------------
+// | Scribe
+function Scribe(game) {
+  this.game_ = game;
+  this.eventsChain_ = [[Scribe.BasicEvents.SPAWNED]];
+};
+
+Scribe.BasicEvents = {
+  SPAWNED: 'Our Hero wakes.',
+  DIED: 'Our Hero falls.'
+};
+
+Scribe.prototype.startNewChain = function(opt_event) {
+  var evt = opt_event || Scribe.BasicEvents.SPAWNED;
+  this.eventsChain_.push([evt]);
+};
+
+Scribe.prototype.addEvent = function(evt) {
+  this.eventsChain_[this.eventsChain_.length - 1].push(evt);
+};
+
+Scribe.prototype.render = function(renderer) {
+  renderer.context().font = 'bold 12px sans-serif';
+  renderer.context().fillStyle = '#666';
+  var first = true;
+  for (var i = this.eventsChain_.length - 1; i >= 0; --i) {
+    renderer.context().fillText(this.eventsChain_[i].join(' '), 0, (i + 1) * 16);
+    if (first) {
+      first = false;
+      renderer.context().fillStyle = '#999';
+    }
+  }
 };
