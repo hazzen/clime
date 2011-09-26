@@ -183,15 +183,25 @@ Scribe.prototype.addEvent = function(evt) {
   this.eventsChain_[this.eventsChain_.length - 1].push(evt);
 };
 
+Scribe.prototype.sizeText_ = function(text, width) {
+};
+
 Scribe.prototype.render = function(renderer) {
   renderer.context().font = 'bold 12px sans-serif';
   renderer.context().fillStyle = '#666';
-  var first = true;
-  for (var i = this.eventsChain_.length - 1; i >= 0; --i) {
-    renderer.context().fillText(this.eventsChain_[i].join(' '), 0, (i + 1) * 16);
-    if (first) {
-      first = false;
+  var y = renderer.height();
+  for (var i = this.eventsChain_.length - 1; i >= 0; --i && y > 16) {
+    var text = this.eventsChain_[i].join(' ');
+    var lines = renderer.wrapTextToLines(text);
+    for (var lx = lines.length; lx > 0; --lx) {
+      if (lx != lines.length) {
+        y -= 12;
+      }
+      renderer.context().fillText(lines[lx - 1], 0, y);
+    }
+    if (i == this.eventsChain_.length - 1) {
       renderer.context().fillStyle = '#999';
     }
+    y -= 16;
   }
 };

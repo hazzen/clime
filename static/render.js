@@ -36,6 +36,32 @@ Renderer.prototype.centerCamera = function(x, y) {
   this.yOffVel_ = 0;
 };
 
+Renderer.prototype.wrapTextToLines = function(text) {
+  var ALLOWANCE = 50;
+  var supposedWidth = this.context_.measureText(text).width;
+  if (supposedWidth < this.w_) {
+    return [text];
+  }
+  var arr = [];
+  var curIndex = 0;
+  for (;;) {
+    var nextSpace = text.indexOf(' ', curIndex);
+    if (nextSpace == -1) {
+      arr.push(text);
+      return arr;
+    }
+    var subText = text.substring(0, nextSpace);
+    var subWidth = this.context_.measureText(subText).width;
+    if (subWidth < this.w_ && ALLOWANCE + subWidth > this.w_) {
+      arr.push(subText);
+      curIndex = 0;
+      text = text.substring(nextSpace + 1);
+    } else {
+      curIndex = nextSpace + 1;
+    }
+  }
+};
+
 Renderer.prototype.render = function(game) {
   this.context_.clearRect(0, 0, this.w_, this.h_);
   // Render the background UI
