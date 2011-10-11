@@ -180,10 +180,10 @@ Scribe.prototype.startNewChain = function(opt_event) {
 };
 
 Scribe.prototype.addEvent = function(evt) {
-  this.eventsChain_[this.eventsChain_.length - 1].push(evt);
-};
-
-Scribe.prototype.sizeText_ = function(text, width) {
+  var curChain = this.eventsChain_[this.eventsChain_.length - 1];
+  if (curChain.indexOf(evt) == -1) {
+    curChain.push(evt);
+  }
 };
 
 Scribe.prototype.render = function(renderer) {

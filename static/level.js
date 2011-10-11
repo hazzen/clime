@@ -8,6 +8,9 @@ Level.createTriggerBlock_ = function(c) {
   if (c.r == 255 && c.g + c.b == 0) {
     return CheckpointTrigger;
   }
+  if (c.b == 255) {
+    return ScribeTrigger;
+  }
   return null;
 };
 

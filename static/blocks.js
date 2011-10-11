@@ -90,3 +90,24 @@ CheckpointTrigger.prototype.playerTouched = function(game) {
   game.setCheckpoint(this);
   game.dude.energy.addSap(DudeEnergy.SapTypes.CHECKPOINT);
 }
+
+// +----------------------------------------------------------------------------
+// | ScribeTrigger
+function ScribeTrigger(x, y, color, opt_w, opt_h) {
+  if (arguments.length == 0) return;
+  TriggerBlock.call(this, x, y, color, opt_w, opt_h);
+  this.solid = false;
+  this.text = ScribeTrigger.EVENT_MAP[color.toCssString()];
+}
+
+ScribeTrigger.EVENT_MAP = {
+  '#0000ff': 'Our Hero sees his village.'
+};
+
+ScribeTrigger.inherits(TriggerBlock);
+
+ScribeTrigger.prototype.actorTouched = function(game, actor) {
+  if (actor instanceof Dude) {
+    game.scribe_.addEvent(this.text);
+  }
+}
