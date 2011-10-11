@@ -13,7 +13,7 @@ function Game(renderer) {
 Game.SQUARE_SIZE = 8;
 
 Game.prototype.playerPos = function() {
-  return new geom.Point(this.dude.x_, this.dude.y_);
+  return new geom.Point(this.dude.x, this.dude.y);
 };
 
 Game.prototype.keyPressed = function(chr) {
@@ -73,10 +73,10 @@ Game.prototype.setCheckpoint = function(trigger) {
 };
 
 Game.prototype.respawn = function() {
-  this.dude.x_ = this.lastCheckpoint_.x;
-  this.dude.y_ = this.lastCheckpoint_.y - Game.SQUARE_SIZE;
+  this.dude.x = this.lastCheckpoint_.x;
+  this.dude.y = this.lastCheckpoint_.y - Game.SQUARE_SIZE;
   this.dude.energy.refill();
-  this.renderer.centerCamera(this.dude.x_, this.dude.y_);
+  this.renderer.centerCamera(this.dude.x, this.dude.y);
 };
 
 Game.prototype.tick = function(t) {

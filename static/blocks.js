@@ -106,8 +106,6 @@ ScribeTrigger.EVENT_MAP = {
 
 ScribeTrigger.inherits(TriggerBlock);
 
-ScribeTrigger.prototype.actorTouched = function(game, actor) {
-  if (actor instanceof Dude) {
-    game.scribe_.addEvent(this.text);
-  }
+ScribeTrigger.prototype.playerTouched = function(game) {
+  game.scribe_.addEvent(this.text);
 }

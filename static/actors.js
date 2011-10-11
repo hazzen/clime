@@ -35,12 +35,12 @@ DudeEnergy.prototype.render = function(renderer) {
 
 function Dude(game, x, y) {
   this.game_ = game;
-  this.x_ = x;
-  this.y_ = y;
+  this.x = x;
+  this.y = y;
   this.pvx_ = 0;
-  this.vx_ = 0;
+  this.vx = 0;
   this.pvy_ = 0;
-  this.vy_ = 0;
+  this.vy = 0;
   this.jumpFrame_ = 0;
   this.energy = new DudeEnergy(10);
 };
@@ -62,16 +62,12 @@ Dude.COMPARE_BLOCK_Y_ASCENDING = function(b1, b2) { return b1.y - b2.y; };
 Dude.COMPARE_BLOCK_Y_DESCENDING = function(b1, b2) { return b2.y - b1.y; };
 
 Dude.prototype.checkGround_ = function() {
-  var x = this.x_;
-  var w = Dude.SIZE;
-  var y = this.y_;
-  var h = Dude.SIZE;
   var blocks = this.game_.level.blocksInQuadrants(
-      new geom.AABB(this.x_, this.y_, Dude.SIZE, Dude.SIZE),
-      new geom.AABB(this.x_ + Math.min(0, this.vx_),
-                    this.y_ + Math.min(0, this.vy_),
-                    Dude.SIZE + Math.max(0, this.vx_),
-                    Dude.SIZE + Math.max(0, this.vy_)));
+      new geom.AABB(this.x, this.y, Dude.SIZE, Dude.SIZE),
+      new geom.AABB(this.x + Math.min(0, this.vx),
+                    this.y + Math.min(0, this.vy),
+                    Dude.SIZE + Math.max(0, this.vx),
+                    Dude.SIZE + Math.max(0, this.vy)));
 
   DEBUG_collisions.push(blocks);
   if (DEBUG_collisions.length > 20) {
@@ -104,8 +100,8 @@ Dude.prototype.checkGround_ = function() {
   bestOfMany([Level.QUADRANTS.MC], function() { return false; });
   var vCollide = false;
   var hCollide = false;
-  if (this.vy_ != 0) {
-    var op = (this.vy_ < 0
+  if (this.vy != 0) {
+    var op = (this.vy < 0
               ? Dude.COMPARE_BLOCK_Y_ASCENDING
               : Dude.COMPARE_BLOCK_Y_DESCENDING);
     var best = null;
@@ -118,9 +114,9 @@ Dude.prototype.checkGround_ = function() {
       best = bestOfMany([Level.QUADRANTS.UC, Level.QUADRANTS.LC], op);
     }
     if (best) {
-      this.y_ = best.y;
-      if (this.vy_ >= 0) {
-        this.y_ -= Dude.SIZE;
+      this.y = best.y;
+      if (this.vy >= 0) {
+        this.y -= Dude.SIZE;
         for (var i = blocks[Level.QUADRANTS.LC].length; i > 0; --i) {
           if (blocks[Level.QUADRANTS.LC][i - 1].solid) {
             this.jumpFrame_ = 0;
@@ -128,81 +124,81 @@ Dude.prototype.checkGround_ = function() {
           }
         }
       } else {
-        this.y_ += best.h;
+        this.y += best.h;
       }
       vCollide = true;
     }
   }
-  if (this.vx_ != 0) {
-    var op = (this.vx_ < 0
+  if (this.vx != 0) {
+    var op = (this.vx < 0
               ? Dude.COMPARE_BLOCK_X_ASCENDING
               : Dude.COMPARE_BLOCK_X_DESCENDING);
     var best = null;
     // Ditto the no-previous movement comment from above.
-    if (this.vy_ != 0 && !vCollide && this.pvy_ != 0) {
+    if (this.vy != 0 && !vCollide && this.pvy_ != 0) {
       best = bestOfMany(Level.QUADRANTS.HORIZONTAL, op);
     } else {
       best = bestOfMany([Level.QUADRANTS.ML, Level.QUADRANTS.MR], op);
     }
     if (best) {
-      this.x_ = best.x;
-      if (this.vx_ >= 0) {
-        this.x_ -= Dude.SIZE;
+      this.x = best.x;
+      if (this.vx >= 0) {
+        this.x -= Dude.SIZE;
       } else {
-        this.x_ += best.w;
+        this.x += best.w;
       }
       hCollide = true;
     }
   }
   if (hCollide) {
-    this.vx_ = 0;
+    this.vx = 0;
   }
   if (vCollide) {
-    this.vy_ = 0;
+    this.vy = 0;
   }
 };
 
 Dude.prototype.tick = function(t) {
-  this.pvx_ = this.vx_;
-  this.pvy_ = this.vy_;
+  this.pvx_ = this.vx;
+  this.pvy_ = this.vy;
   if (this.game_.keyDown(37)) {
-    this.vx_ -= Dude.ACCEL_X;
+    this.vx -= Dude.ACCEL_X;
   }
   if (this.game_.keyDown(39)) {
-    this.vx_ += Dude.ACCEL_X;
+    this.vx += Dude.ACCEL_X;
   }
-  this.vx_ = Math.min(Dude.MAX_VX, Math.max(-Dude.MAX_VX, this.vx_));
-  if (this.vx_ > Dude.DEACCEL_X) {
-    this.vx_ -= Dude.DEACCEL_X;
-  } else if (this.vx_ < -Dude.DEACCEL_X) {
-    this.vx_ += Dude.DEACCEL_X;
-  } else if (this.vx_ != 0) {
-    this.vx_ = 0;
+  this.vx = Math.min(Dude.MAX_VX, Math.max(-Dude.MAX_VX, this.vx));
+  if (this.vx > Dude.DEACCEL_X) {
+    this.vx -= Dude.DEACCEL_X;
+  } else if (this.vx < -Dude.DEACCEL_X) {
+    this.vx += Dude.DEACCEL_X;
+  } else if (this.vx != 0) {
+    this.vx = 0;
   }
   if (this.game_.keyDown('z') && this.jumpFrame_ < 10) {
     ++this.jumpFrame_;
     if (this.jumpFrame_ == 1) {
-      this.vy_ -= 5 * Dude.ACCEL_Y;
+      this.vy -= 5 * Dude.ACCEL_Y;
     } else {
-      this.vy_ -= 1.3 * Dude.ACCEL_Y;
+      this.vy -= 1.3 * Dude.ACCEL_Y;
     }
   }
-  this.vy_ += Dude.ACCEL_Y;
-  if (this.jumpFrame_ >= 10 && this.vy_ < 0) {
-    this.vy_ += Dude.ACCEL_Y;
+  this.vy += Dude.ACCEL_Y;
+  if (this.jumpFrame_ >= 10 && this.vy < 0) {
+    this.vy += Dude.ACCEL_Y;
   }
 
   this.checkGround_();
 
-  this.x_ += this.vx_;
-  this.y_ += this.vy_;
+  this.x += this.vx;
+  this.y += this.vy;
   this.energy.tick(t);
 };
 
 Dude.prototype.render = function(renderer) {
   renderer.context().fillStyle = '#cdf';
   renderer.context().fillRect(
-      this.x_, this.y_, Dude.SIZE, Dude.SIZE);
+      this.x, this.y, Dude.SIZE, Dude.SIZE);
 };
 
 function Rope(game, x, y, len) {
