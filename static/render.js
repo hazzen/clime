@@ -73,14 +73,14 @@ Renderer.prototype.render = function(game) {
   var accel = function(cur, target, vel) {
     if (Math.abs(cur - target) < 50) {
       if (vel > 0.5) {
-        return -vel / 2;
+        return -vel * 0.05;
       } else {
         return -vel;
       }
     } else if (vel < 10) {
       return sgn(target - cur) * 0.3;
     } else {
-      return sgn(target - cur) * 0.7;
+      return sgn(target - cur) * 1.7;
     }
   };
   var playerPos = game.playerPos();

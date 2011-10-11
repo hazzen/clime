@@ -45,12 +45,12 @@ function Dude(game, x, y) {
   this.energy = new DudeEnergy(10);
 };
 
-Dude.MAX_VX = 7;
-Dude.ACCEL_X = 1;
-Dude.DEACCEL_X = 0.5;
+Dude.MAX_VX = 300;
+Dude.ACCEL_X = 20;
+Dude.DEACCEL_X = 10;
 
-Dude.MAX_VY = 10;
-Dude.ACCEL_Y = 1;
+Dude.MAX_VY = 500;
+Dude.ACCEL_Y = 40;
 
 Dude.SIZE = 2 * Game.SQUARE_SIZE;
 
@@ -61,13 +61,13 @@ Dude.COMPARE_BLOCK_X_DESCENDING = function(b1, b2) { return b2.x - b1.x; };
 Dude.COMPARE_BLOCK_Y_ASCENDING = function(b1, b2) { return b1.y - b2.y; };
 Dude.COMPARE_BLOCK_Y_DESCENDING = function(b1, b2) { return b2.y - b1.y; };
 
-Dude.prototype.checkGround_ = function() {
+Dude.prototype.checkGround_ = function(t) {
   var blocks = this.game_.level.blocksInQuadrants(
       new geom.AABB(this.x, this.y, Dude.SIZE, Dude.SIZE),
-      new geom.AABB(this.x + Math.min(0, this.vx),
-                    this.y + Math.min(0, this.vy),
-                    Dude.SIZE + Math.max(0, this.vx),
-                    Dude.SIZE + Math.max(0, this.vy)));
+      new geom.AABB(this.x + Math.min(0, t * this.vx),
+                    this.y + Math.min(0, t * this.vy),
+                    Dude.SIZE + Math.max(0, t * this.vx),
+                    Dude.SIZE + Math.max(0, t * this.vy)));
 
   DEBUG_collisions.push(blocks);
   if (DEBUG_collisions.length > 20) {
@@ -180,18 +180,15 @@ Dude.prototype.tick = function(t) {
     if (this.jumpFrame_ == 1) {
       this.vy -= 5 * Dude.ACCEL_Y;
     } else {
-      this.vy -= 1.3 * Dude.ACCEL_Y;
+      this.vy -= 1.5 * Dude.ACCEL_Y;
     }
   }
   this.vy += Dude.ACCEL_Y;
-  if (this.jumpFrame_ >= 10 && this.vy < 0) {
-    this.vy += Dude.ACCEL_Y;
-  }
 
-  this.checkGround_();
+  this.checkGround_(t);
 
-  this.x += this.vx;
-  this.y += this.vy;
+  this.x += t * this.vx;
+  this.y += t * this.vy;
   this.energy.tick(t);
 };
 
