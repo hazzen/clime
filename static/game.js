@@ -4,6 +4,7 @@ function Game(renderer) {
   //this.rope_ = new Rope(this, 300, 0, 50);
   this.renderer = renderer;
   this.dude = new Dude(this, 8, 25);
+  this.actors = [];
   this.keyDown_ = {};
   this.keyDownCounts_ = {};
   this.level_ = null;
@@ -75,18 +76,38 @@ Game.prototype.setCheckpoint = function(trigger) {
 Game.prototype.respawn = function() {
   this.dude.x = this.lastCheckpoint_.x;
   this.dude.y = this.lastCheckpoint_.y - Game.SQUARE_SIZE;
+  this.dude.paused = false;
   this.dude.energy.refill();
   this.renderer.centerCamera(this.dude.x, this.dude.y);
+};
+
+Game.prototype.addActor = function(actor) {
+  for (var i = 0; i < this.actors.length; ++i) {
+    if (!this.actors[i]) {
+      this.actors[i] = actor;
+      return;
+    }
+  }
+  this.actors.push(actor);
 };
 
 Game.prototype.tick = function(t) {
   this.tickHandleInput_(t);
 
   this.dude.tick(t);
-  if (this.dude.energy.energy <= 0) {
+  for (var i = 0; i < this.actors.length; ++i) {
+    if (this.actors[i] && this.actors[i].tick(t)) {
+      this.actors[i] = null;
+    }
+  }
+  if (this.dude.energy.energy <= 0 && !this.dude.paused) {
+    this.dude.die();
     this.scribe_.addEvent(Scribe.BasicEvents.DIED);
-    this.respawn();
-    this.scribe_.startNewChain();
+    this.addActor(new DeathAnimation(this, this.dude.x, this.dude.y,
+          bind(this, function() {
+            this.respawn();
+            this.scribe_.startNewChain();
+          })));
   }
   /*
   if (this.level_.collidesCircle(this.rope_.asLine().p2, 5)) {
@@ -145,6 +166,11 @@ Game.prototype.renderUiForeground = function(renderer) {
 
 Game.prototype.render = function(renderer) {
   this.dude.render(renderer);
+  for (var i = 0; i < this.actors.length; ++i) {
+    if (this.actors[i] && this.actors[i].render(renderer)) {
+      this.actors[i] = null;
+    }
+  }
   if (this.level) {
     this.level.render(renderer);
   }

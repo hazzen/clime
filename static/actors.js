@@ -1,3 +1,6 @@
+
+// +----------------------------------------------------------------------------
+// | DudeEnergy
 function DudeEnergy(energy, opt_maxEnergy) {
   this.energy = energy;
   this.maxEnergy = opt_maxEnergy || energy;
@@ -33,6 +36,8 @@ DudeEnergy.prototype.render = function(renderer) {
   renderer.context().fillRect((renderer.width() - width) / 2, 0, width, 10);
 };
 
+// +----------------------------------------------------------------------------
+// | Dude
 function Dude(game, x, y) {
   this.game_ = game;
   this.x = x;
@@ -43,6 +48,7 @@ function Dude(game, x, y) {
   this.vy = 0;
   this.jumpFrame_ = 0;
   this.energy = new DudeEnergy(10);
+  this.paused = false;
 };
 
 Dude.MAX_VX = 300;
@@ -158,7 +164,17 @@ Dude.prototype.checkGround_ = function(t) {
   }
 };
 
+Dude.prototype.die = function() {
+  this.paused = true;
+  this.vx = 0;
+  this.vy = 0;
+  this.pvx_ = 0;
+  this.pvy_ = 0;
+  this.jumpFrame_ = 0;
+}
+
 Dude.prototype.tick = function(t) {
+  if (this.paused) return;
   this.pvx_ = this.vx;
   this.pvy_ = this.vy;
   if (this.game_.keyDown(37)) {
@@ -193,9 +209,40 @@ Dude.prototype.tick = function(t) {
 };
 
 Dude.prototype.render = function(renderer) {
+  if (this.paused) return;
   renderer.context().fillStyle = '#cdf';
   renderer.context().fillRect(
       this.x, this.y, Dude.SIZE, Dude.SIZE);
+};
+
+// +----------------------------------------------------------------------------
+// | DeathAnimation
+function DeathAnimation(game, x, y, onFinish) {
+  this.game = game;
+  this.x = x;
+  this.y = y;
+  this.frame = DeathAnimation.NUM_FRAMES;
+  this.onFinish = onFinish;
+};
+
+DeathAnimation.NUM_FRAMES = 60;
+
+DeathAnimation.prototype.tick = function(t) {
+};
+
+DeathAnimation.prototype.render = function(renderer) {
+  this.frame--;
+  renderer.context().fillStyle = '#fdc';
+  var width = this.frame / DeathAnimation.NUM_FRAMES * Dude.SIZE;
+  var height = this.frame / DeathAnimation.NUM_FRAMES * Dude.SIZE;
+  var targetX = this.x + (Dude.SIZE - width) / 2;
+  var targetY = this.y + (Dude.SIZE - height) / 2;
+  renderer.context().fillRect(
+      targetX, targetY, width, height);
+  if (this.frame <= 0) {
+    this.onFinish();
+    return true;
+  }
 };
 
 function Rope(game, x, y, len) {
